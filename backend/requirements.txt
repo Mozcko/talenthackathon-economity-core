@@ -1,0 +1,16 @@
+# Framework y Servidor
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Base de Datos
+sqlalchemy
+psycopg2-binary
+
+# Configuración y Validación
+pydantic
+pydantic-settings
+
+# Autenticación JWT (Clerk)
+pyjwt
+cryptography

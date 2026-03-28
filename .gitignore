@@ -1,0 +1,22 @@
+# .gitignore
+
+# Entornos virtuales de Python
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+
+# Variables de entorno
+.env
+.env.local
+
+# Node / Frontend (para cuando lo inicies)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.next/
+
+# MacOS / Windows
+.DS_Store
+Thumbs.db

@@ -1,0 +1,24 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Entornos Virtuales ---
+venv/
+.venv/
+env/
+ENV/
+
+# --- Variables de Entorno ---
+.env
+.env.*
+!.env.example
+
+# --- Base de Datos (Por si usas SQLite local de backup) ---
+*.sqlite3
+*.db
+
+# --- Análisis Estático y Testing ---
+.pytest_cache/
+.coverage
+.ruff_cache/
