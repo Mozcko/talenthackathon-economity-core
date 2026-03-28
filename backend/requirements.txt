@@ -1,16 +1,22 @@
-# Framework y Servidor
+# --- Framework y Servidor ---
 fastapi
 uvicorn[standard]
 python-multipart
 
-# Base de Datos
+# --- Base de Datos Relacional ---
 sqlalchemy
 psycopg2-binary
 
-# Configuración y Validación
+# --- Configuración y Validación ---
 pydantic
 pydantic-settings
 
-# Autenticación JWT (Clerk)
+# --- Ecosistema de IA (Economity) ---
+langchain
+langchain-openai
+chromadb
+openai
+
+# --- Autenticación y Seguridad ---
 pyjwt
 cryptography

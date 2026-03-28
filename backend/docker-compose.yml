@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # 1. Base de Datos Relacional (Aurora Serverless Mock)
+  db:
+    image: docker.io/postgres:15-alpine 
+    container_name: economity-db
+    restart: always
+    environment:
+      POSTGRES_USER: economity_admin
+      POSTGRES_PASSWORD: economity_password
+      POSTGRES_DB: economity_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Base de Datos Vectorial para RAG (ChromaDB)
+  chromadb:
+    image: docker.io/chromadb/chroma:latest
+    container_name: economity-chroma
+    restart: always
+    ports:
+      - "8001:8000" # Mapeamos al 8001 localmente para que no choque con FastAPI
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  # 3. Backend Lógico y Agentes IA
+  api:
+    build: .
+    container_name: economity-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app:z
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://economity_admin:economity_password@db:5432/economity_dev
+      - CHROMA_URL=http://chromadb:8000
+      - PYTHONPATH=/app
+    depends_on:
+      - db
+      - chromadb
+
+volumes:
+  postgres_data:
+  chroma_data:
