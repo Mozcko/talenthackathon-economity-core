@@ -6,6 +6,10 @@ import requests
 from src.core.config import settings
 from src.core.database import get_db, engine
 
+from src.models.base import Base
+import src.models
+
+Base.metadata.create_all(bind=engine)
 
 # Inicialización de la aplicación FastAPI
 app = FastAPI(
