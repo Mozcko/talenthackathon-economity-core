@@ -14,6 +14,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U economity_admin -d economity_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # 2. Base de Datos Vectorial para RAG (ChromaDB)
   chromadb:
@@ -40,8 +45,11 @@ services:
       - CHROMA_URL=http://chromadb:8000
       - PYTHONPATH=/app
     depends_on:
-      - db
-      - chromadb
+      db:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    restart: always
 
 volumes:
   postgres_data:
