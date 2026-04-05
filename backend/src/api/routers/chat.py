@@ -9,16 +9,13 @@ from src.core.database import get_db
 from src.core.config import settings
 from src.services.dashboard import get_dashboard_summary
 
-# Importaciones de los Agentes IA
+# Importaciones de los Agentes IA y el Router Semántico
 from src.services.ai.router import clasificar_intencion_async
 from src.services.ai.memory import formatear_historial
 from src.services.ai.agents.fiscal_agent import consultar_rag_fiscal_async
 from src.services.ai.agents.math_agent import calcular_proyeccion_async
 from src.services.ai.agents.data_agent import analizar_datos_async
-
-# Importaciones de LangChain para el chat general
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
+from src.services.ai.agents.support_agent import soporte_general_async
 
 router = APIRouter(prefix="/ws", tags=["WebSockets (Agentes IA)"])
 
@@ -107,12 +104,17 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
             # Inyectamos la realidad del usuario al historial para que todos los agentes la lean
             historial_enriquecido = f"{contexto_financiero}\n\nHistorial de charla:\n{historial_texto}"
 
-            # 2. Enrutamiento Semántico
-            await manager.send_status("analizando intención...", websocket)
+            # 2. Enrutamiento Semántico y Guardrail
+            await manager.send_status("analizando intención y seguridad...", websocket)
             categoria = await clasificar_intencion_async(contenido)
             
+            # --- PROTECCIÓN ANTI PROMPT-INJECTION ---
+            if categoria == "BLOQUEADO":
+                await manager.send_status("escribiendo...", websocket)
+                respuesta = "Lo siento, como Arquitecto Financiero de Economity, mi función está estrictamente limitada a temas de finanzas personales, inversiones y uso de la aplicación. No puedo ayudarte con esa solicitud."
+                
             # 3. Ejecución Delegada a los Agentes Especializados
-            if categoria == "CONSULTA_FISCAL":
+            elif categoria == "CONSULTA_FISCAL":
                 await manager.send_status("consultando leyes y contexto...", websocket)
                 respuesta = await consultar_rag_fiscal_async(contenido, historial_enriquecido)
                 
@@ -124,17 +126,14 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
                 await manager.send_status("analizando tu historial de gastos...", websocket)
                 respuesta = await analizar_datos_async(contenido, historial_enriquecido, tenant_id_str)
                 
-            else:
+            elif categoria == "SOPORTE_GENERAL":
                 await manager.send_status("escribiendo...", websocket)
-                # Respuesta general del Arquitecto Financiero Base
-                llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.7, api_key=settings.openai_api_key)
-                prompt = ChatPromptTemplate.from_messages([
-                    ("system", "Eres Economity, un arquitecto financiero amigable. Responde de manera concisa. Aquí están los datos del usuario para que le des consejos personalizados: {contexto}"),
-                    ("human", "{pregunta}")
-                ])
-                chain = prompt | llm
-                res = await chain.ainvoke({"contexto": contexto_financiero, "pregunta": contenido})
-                respuesta = res.content
+                respuesta = await soporte_general_async(contenido, historial_enriquecido)
+                
+            else:
+                # Fallback por si el router devuelve algo inesperado
+                await manager.send_status("escribiendo...", websocket)
+                respuesta = "He recibido tu mensaje, pero no estoy seguro de cómo procesarlo. ¿Podrías reformular tu duda financiera?"
 
             # 4. Enviar respuesta final
             await manager.send_message(respuesta, websocket)
