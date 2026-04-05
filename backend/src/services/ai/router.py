@@ -4,22 +4,15 @@ from langchain_openai import ChatOpenAI
 from src.core.config import settings
 
 async def clasificar_intencion_async(pregunta: str) -> str:
-    """
-    Actúa como el 'Agent Router' del diagrama de Economity.
-    Decide qué flujo especializado debe atender la petición.
-    """
-    llm = ChatOpenAI(
-        model="gpt-4o-mini", # Rápido y barato para enrutamiento
-        temperature=0, 
-        api_key=settings.openai_api_key
-    )
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=settings.openai_api_key)
 
     template = """
     Eres el Supervisor de Economity, un arquitecto financiero autónomo.
     Clasifica la intención del usuario en UNA sola categoría:
     
-    - CONSULTA_FISCAL: Preguntas sobre impuestos, ISR, exenciones, SOFIPOS, CETES o regulaciones. (Requiere RAG).
-    - PROYECCION_MATEMATICA: El usuario pide calcular rendimientos, interés compuesto, o proyectar inversiones a futuro. (Requiere Tool Calling).
+    - CONSULTA_FISCAL: Preguntas sobre impuestos, ISR, exenciones, SOFIPOS, CETES o regulaciones.
+    - PROYECCION_MATEMATICA: El usuario pide calcular rendimientos, interés compuesto, o proyectar inversiones a futuro.
+    - ANALISIS_DATOS: El usuario pide analizar sus transacciones, saber en qué gastó, o resúmenes de su propio dinero/historial.
     - GENERAL: Saludos, educación financiera básica o charla general.
 
     Responde ÚNICAMENTE con la palabra de la categoría.
