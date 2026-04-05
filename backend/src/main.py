@@ -9,6 +9,15 @@ from src.core.database import get_db, engine
 from src.models.base import Base
 import src.models
 
+from src.api.routers import user as user_routes
+from src.api.routers import chat as chat_routes
+from src.api.routers import investment as investment_routes
+from src.api.routers import transaction as transaction_routes
+from src.api.routers import goal as goal_routes
+from src.api.routers import category as category_routes
+from src.api.routers import tenant as tenant_routes
+from src.api.routers import dashboard as dashboard_routes
+
 Base.metadata.create_all(bind=engine)
 
 # Inicialización de la aplicación FastAPI
@@ -17,6 +26,18 @@ app = FastAPI(
     description=settings.app_description,
     version=settings.app_version
 )
+
+# Inclusión de Routers
+app.include_router(user_routes.router)
+app.include_router(transaction_routes.router)
+app.include_router(investment_routes.router)
+app.include_router(chat_routes.router)
+app.include_router(goal_routes.router)
+app.include_router(category_routes.router)
+app.include_router(tenant_routes.router)
+app.include_router(dashboard_routes.router)
+
+# --- RUTAS GENERALES ---
 
 @app.get("/", tags=["General"])
 def read_root():

@@ -19,6 +19,7 @@ class Usuario(Base, AuditMixin):
     tenant = relationship("Tenant", back_populates="usuarios")
     cuentas = relationship("CuentaFinanciera", back_populates="usuario")
     portafolios = relationship("PortafolioInversion", back_populates="usuario")
+    metas = relationship("MetaFinanciera", back_populates="usuario")
 
 class CuentaFinanciera(Base, AuditMixin):
     __tablename__ = "cuentas_financieras"
