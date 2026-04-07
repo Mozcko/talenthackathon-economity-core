@@ -1,5 +1,5 @@
 ---
-
+import { Show, UserButton, SignInButton, SignUpButton } from '@clerk/astro/components'
 ---
 
 <nav
@@ -41,32 +41,19 @@
       ></span>
     </button>
 
-    <button
-      class="group relative flex items-center gap-2.5 py-2 text-on-surface/50 font-display font-semibold transition-all duration-300 hover:text-secondary cursor-pointer"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="opacity-50 group-hover:opacity-100 transition-opacity"
-      >
-        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-        <circle cx="12" cy="7" r="4"></circle>
-      </svg>
-      <span>Perfil</span>
-
-      <span
-        class="absolute -bottom-[25px] left-0 w-full h-1 bg-secondary opacity-0 transition-all duration-300
-                         group-hover:opacity-100 group-hover:shadow-[0_0_15px_var(--color-secondary-fixed-dim)]"
-      ></span>
-    </button>
+    <Show when="signed-out">
+      <div class="flex items-center gap-4">
+        <SignInButton mode="modal">
+          <button class="btn-tertiary">Log in</button>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <button class="btn-primary py-2 px-6 text-sm">Sign up</button>
+        </SignUpButton>
+      </div>
+    </Show>
+    
+    <Show when="signed-in">
+      <UserButton />
+    </Show>
   </div>
-
-  
 </nav>

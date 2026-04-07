@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro'
+import { Show, SignIn } from '@clerk/astro/components'
+---
+
+<Layout title="Economity login">
+  <main class="flex min-h-[calc(100vh-80px)] w-full">
+    
+    <!-- Left Side: Login Form (Aside) -->
+    <aside class="flex-1 flex flex-col items-center justify-center p-8 bg-surface-container-lowest">
+      <Show when="signed-out">
+        <!-- This renders the full Clerk Login Form -->
+        <div class="w-full max-w-md flex justify-center">
+          <SignIn fallbackRedirectUrl="/" />
+        </div>
+      </Show>
+      
+      <Show when="signed-in">
+        <div class="card-base text-center shadow-ambient max-w-md w-full">
+          <h1 class="font-display font-bold text-3xl mb-4 text-primary">Welcome back!</h1>
+          <p class="text-on-surface/70">You are already signed in to Economity.</p>
+        </div>
+      </Show>
+    </aside>
+
+    <!-- Right Side: App Information -->
+    <section class="hidden lg:flex flex-1 flex-col items-center justify-center bg-surface-container-low relative overflow-hidden p-12 border-l border-outline-variant/30">
+      <div class="absolute inset-0 bg-momentum-glow opacity-60"></div>
+      
+      <div class="relative z-10 max-w-xl text-center flex flex-col items-center">
+        <h2 class="text-display-lg text-primary mb-6">Empower Your Finances</h2>
+        <p class="text-on-surface/70 text-lg mb-10 leading-relaxed font-medium max-w-md">
+          Economity gives you the insights and tools you need to take control of your portfolio, track transactions in real-time, and make smarter financial decisions powered by AI.
+        </p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <span class="ai-chip">Smart Insights</span>
+          <span class="ai-chip">Real-time Data</span>
+          <span class="ai-chip">Bank-Grade Security</span>
+        </div>
+      </div>
+    </section>
+    
+  </main>
+</Layout>
