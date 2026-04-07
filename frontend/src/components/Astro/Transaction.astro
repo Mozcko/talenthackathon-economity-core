@@ -1,51 +1,172 @@
 ---
 const ListaT = [];
+const categories = ["Travel", "General", "Services", "Health", "Education", "Retirement Funds"];
+const wealthMomentumValue = 15.4; // Example variable
+const momentumColor = wealthMomentumValue >= 0 ? "text-secondary" : "text-red-600";
 ---
+<!-- Flatpickr for the functional calendar -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<div
-  class="bg-color-surface-container-low flex-col items-center justify-center"
->
-  <h3 class="text-black">Historial de Movimientos Inteligente</h3>
-  <p>Tus finanzas clasificadas automáticamente por IA✨</p>
+<div class="bg-surface-container-lowest min-h-screen w-full p-10 font-body">
+  <header class="mb-10">
+    <h1 class="text-4xl font-display font-bold text-primary">Historial de Movimientos Inteligente</h1>
+    <p class="text-on-surface/60 text-lg mt-2 font-medium">Tus finanzas clasificadas automáticamente por IA ✨</p>
+  </header>
 
-  <div class="flex">
+  <div class="flex gap-10">
     <!-- Filtros -->
-    <div class="flex">
-      <div class="flex">
-        <button>All</button>
-        <button>Income</button>
-        <button>Expenses</button>
-        <p>Categories:</p>
-        <ul></ul>
-        <p>Date range</p>
+    <div class="flex-1">
+      <div class="flex items-center flex-nowrap gap-4 mb-8">
+        <div class="flex gap-2" id="filter-buttons">
+          <button class="filter-btn active">All</button>
+          <button class="filter-btn">Income</button>
+          <button class="filter-btn">Expenses</button>
+        </div>
+
+        <!-- Categories Dropdown -->
+        <div class="relative group">
+          <button class="filter-btn flex items-center gap-2">
+            Categories
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="absolute left-0 mt-2 w-48 bg-surface-container-low border border-outline-variant rounded-xl shadow-ambient opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 overflow-hidden">
+            <ul class="py-2">
+              {categories.map((cat) => (
+                <li class="px-4 py-2 hover:bg-black hover:text-white cursor-pointer transition-colors text-sm font-medium">{cat}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Date Range Dropdown -->
+        <div class="relative">
+          <button class="filter-btn flex items-center gap-2" id="date-range-display">
+            <span>Date range</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div id="date-picker-container" class="absolute left-0 mt-2 p-2 bg-surface-container-low border border-outline-variant rounded-xl shadow-ambient hidden z-20">
+             <div id="date-picker-calendar"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Lista de movimientos (ListaT) -->
-      <div class="flex-col"></div>
+      <div class="w-full min-h-[400px] border-t border-outline-variant/30 pt-6">
+        {ListaT.length === 0 && (
+           <div class="flex flex-col items-center justify-center h-full text-on-surface/30 italic">
+              <p>No hay transacciones recientes para mostrar</p>
+           </div>
+        )}
+      </div>
     </div>
 
-    <div class="flex-col">
-      <p>Monthly Summary</p>
-      <div class="flex">
-        <div class="col">
-          <p>Total Income</p>
-          <p>$0.00</p>
+    <!-- Monthly Summary -->
+    <div class="w-80 bg-surface-container-lowest border border-outline-variant rounded-[2rem] p-8 shadow-ambient h-fit">
+      <h4 class="font-display font-bold text-xl mb-6">Monthly Summary</h4>
+      
+      <!-- Total Income -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-on-surface/50 uppercase tracking-wider">Total Income</span>
+          <span class="text-2xl font-display font-extrabold text-secondary">$0.00</span>
         </div>
-        <img src="" alt="" />
-      </div>
-      <div class="flex">
-        <div class="col">
-          <p>Total Expenses</p>
-          <p>$0.00</p>
+        <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
         </div>
-        <img src="" alt="" />
       </div>
-      <div>
-        Wealth momentum
-        
+
+      <div class="w-full h-px bg-outline-variant/30 my-6"></div>
+
+      <!-- Total Expenses -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col">
+          <span class="text-xs font-bold text-on-surface/50 uppercase tracking-wider">Total Expenses</span>
+          <span class="text-2xl font-display font-extrabold text-red-600">$0.00</span>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-red-600/10 flex items-center justify-center text-red-600">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+        </div>
+      </div>
+
+      <div class="w-full h-px bg-outline-variant/30 my-6"></div>
+
+      <!-- Wealth Momentum -->
+      <div class="flex flex-col">
+        <h5 class="font-display font-bold text-sm mb-1 uppercase tracking-tight text-on-surface/80">Wealth momentum</h5>
+        <p class={`text-3xl font-display font-black ${momentumColor}`}>
+          {wealthMomentumValue >= 0 ? '+' : ''}{wealthMomentumValue}%
+        </p>
       </div>
     </div>
   </div>
 </div>
 
-<style></style>
+<style>
+  @reference "../../styles/global.css";
+
+  .filter-btn {
+    @apply px-6 py-2.5 rounded-full bg-surface-container-low text-on-surface font-semibold text-sm transition-all duration-300 hover:bg-black hover:text-white cursor-pointer;
+  }
+
+  .filter-btn.active {
+    @apply bg-black text-white;
+  }
+
+  /* Customizing Flatpickr to match the theme */
+  :global(.flatpickr-calendar) {
+    @apply !shadow-ambient !border-none !rounded-xl !font-body;
+  }
+  :global(.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.prevMonthDay, .flatpickr-day.selected.nextMonthDay, .flatpickr-day.startRange.prevMonthDay, .flatpickr-day.startRange.nextMonthDay, .flatpickr-day.endRange.prevMonthDay, .flatpickr-day.endRange.nextMonthDay) {
+    background: var(--color-secondary) !important;
+    border-color: var(--color-secondary) !important;
+    @apply !rounded-lg;
+  }
+</style>
+
+<script>
+  const buttons = document.querySelectorAll('.filter-btn');
+  
+  buttons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        // Only toggle for the first 3 buttons (All, Income, Expenses)
+        const parent = btn.closest('#filter-buttons');
+        if (parent) {
+            parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    });
+  });
+
+  // Initialize Flatpickr for the Range Calendar
+  const dateRangeBtn = document.getElementById('date-range-display');
+  const rangeDisplay = dateRangeBtn?.querySelector('span');
+  const datePickerContainer = document.getElementById('date-picker-container');
+  
+  if (dateRangeBtn && datePickerContainer) {
+    dateRangeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      datePickerContainer.classList.toggle('hidden');
+    });
+
+    // Close calendar when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!datePickerContainer.contains(e.target as Node) && e.target !== dateRangeBtn) {
+        datePickerContainer.classList.add('hidden');
+      }
+    });
+  }
+
+  // @ts-ignore
+  flatpickr("#date-picker-calendar", {
+    mode: "range",
+    inline: true,
+    showMonths: 1,
+    dateFormat: "Y-m-d",
+    onChange: function(selectedDates, dateStr) {
+        if (selectedDates.length === 2 && rangeDisplay) {
+            rangeDisplay.textContent = `${selectedDates[0].toLocaleDateString()} - ${selectedDates[1].toLocaleDateString()}`;
+        }
+    },
+  });
+</script>

@@ -20,6 +20,9 @@
   --color-tertiary-container: #002114;
   --color-on-tertiary-fixed: #68fcbf;
 
+  /* Ambient Shadows: Defined in theme so @apply recognizes it */
+  --shadow-ambient: 0 40px 60px 0 rgba(25, 28, 30, 0.06);
+
   /* Texto y Bordes */
   --color-on-surface: #191c1e;
   --color-outline-variant: #c5c6cd;
@@ -50,11 +53,6 @@
     font-size: 3.5rem;
     letter-spacing: -0.02em;
     line-height: 1.1;
-  }
-
-  /* Ambient Shadows: Luz natural, sin spread, alta difuminación */
-  .shadow-ambient {
-    box-shadow: 0 40px 60px 0 rgba(25, 28, 30, 0.06);
   }
 
   /* Ghost Border: Solo para casos de accesibilidad */
