@@ -1,10 +1,16 @@
 ---
 
+import Navbar from "../components/Astro/Navbar.astro"
 import Layout from "../layouts/Layout.astro"
+import Sidebar from "../components/Astro/Sidebar.astro"
+
 
 ---
 <Layout title="">
-	<p class="Manrope">Why are we here? Just to suffer</p>
+	<Navbar />
+	<Sidebar />
+
+	{/*<p class="Manrope">Why are we here? Just to suffer</p> */}
 </Layout>
 
 <style>
