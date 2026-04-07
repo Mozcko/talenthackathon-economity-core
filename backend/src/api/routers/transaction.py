@@ -96,12 +96,25 @@ def registrar_transaccion_por_voz(
         )
         
         # 6. Persistir en la base de datos relacional
-        return transaction_service.create_transaccion(db=db, transaccion=nueva_transaccion)
+        db_res = transaction_service.create_transaccion(db=db, transaccion=nueva_transaccion)
+        
+        # 7. Bono Extra por Zero-Friction (IA)
+        from src.services import gamification as gamification_service
+        user_id = token_payload.get("sub")
+        gamification_service.award_xp(
+            db, 
+            user_id=user_id, 
+            amount=5, 
+            event_type="audio_log_bonus", 
+            reference_id=str(db_res.id)
+        )
+        
+        return db_res
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en IA o guardado: {str(e)}")
     finally:
-        # 7. Limpieza: Borrar el archivo temporal siempre, incluso si hubo errores
+        # 8. Limpieza: Borrar el archivo temporal siempre, incluso si hubo errores
         if os.path.exists(temp_file_path):
             os.remove(temp_file_path)
 
@@ -138,7 +151,21 @@ def registrar_transaccion_por_ticket(
             descripcion=datos_ia.descripcion
         )
         
-        return transaction_service.create_transaccion(db=db, transaccion=nueva_transaccion)
+        # Persistir
+        db_res = transaction_service.create_transaccion(db=db, transaccion=nueva_transaccion)
+        
+        # Bono Extra Vision (IA)
+        from src.services import gamification as gamification_service
+        user_id = token_payload.get("sub")
+        gamification_service.award_xp(
+            db, 
+            user_id=user_id, 
+            amount=10, 
+            event_type="image_log_bonus", 
+            reference_id=str(db_res.id)
+        )
+        
+        return db_res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al analizar el ticket: {str(e)}")
     finally:
