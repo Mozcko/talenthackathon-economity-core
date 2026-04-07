@@ -2,10 +2,14 @@
 
 import Layout from "../layouts/Layout.astro"
 import Sidebar from "../components/Astro/Sidebar.astro"
+import Transaction from "../components/Astro/Transaction.astro"
 
 ---
 <Layout title="">
-
+	<div class="flex">
+		<Sidebar />
+		<Transaction />
+	</div>
 	{/*<p class="Manrope">Why are we here? Just to suffer</p> */}
 </Layout>
 
