@@ -3,14 +3,25 @@
 import Layout from "../layouts/Layout.astro"
 import Sidebar from "../components/Astro/Sidebar.astro"
 import Transaction from "../components/Astro/Transaction.astro"
+import Dashboard from "../components/Astro/Dashboard.astro"
+import Insights from "../components/Astro/Insights.astro"
+import Chat from "../components/Astro/Chat.astro"
+import Vault from "../components/Astro/Vault.astro"
 
+// Get the current tab from the URL, defaulting to 'dashboard'
+const currentTab = Astro.url.searchParams.get('tab') || 'dashboard';
 ---
-<Layout title="">
-	<div class="flex">
-		<Sidebar />
-		<Transaction />
+<Layout title="Economity Dashboard">
+	<div class="flex h-[calc(100vh-80px)] overflow-hidden">
+		<Sidebar currentTab={currentTab} />
+		<main class="flex-1 overflow-y-auto w-full">
+			{currentTab === 'dashboard' && <Dashboard />}
+			{currentTab === 'transactions' && <Transaction />}
+			{currentTab === 'insights' && <Insights />}
+			{currentTab === 'vault' && <Vault />}
+			{currentTab === 'chat' && <Chat />}
+		</main>
 	</div>
-	{/*<p class="Manrope">Why are we here? Just to suffer</p> */}
 </Layout>
 
 <style>
