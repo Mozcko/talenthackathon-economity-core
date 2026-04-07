@@ -57,6 +57,35 @@ def seed_database():
             db.add_all(instrumentos)
             db.commit()
             
+        # --- SEED DE GAMIFICACIÓN ---
+        from src.models.gamification import AchievementDefinition
+        if not db.query(AchievementDefinition).first():
+            print("🏆 Sembrando Logros de Gamificación...")
+            achievements = [
+                AchievementDefinition(
+                    code="first_expense", name="Primer Gasto", 
+                    description="Registraste tu primer gasto en la plataforma.", 
+                    xp_reward=50
+                ),
+                AchievementDefinition(
+                    code="streak_3", name="Trifecta", 
+                    description="Mantuviste una racha de 3 días registrando actividad.", 
+                    xp_reward=100
+                ),
+                AchievementDefinition(
+                    code="streak_7", name="Semana Perfecta", 
+                    description="Mantuviste una racha de 7 días. ¡Excelente disciplina!", 
+                    xp_reward=250
+                ),
+                AchievementDefinition(
+                    code="silver_tier", name="Ascenso a Plata", 
+                    description="Alcanzaste el nivel Plata acumulando 100 XP.", 
+                    xp_reward=150
+                ),
+            ]
+            db.add_all(achievements)
+            db.commit()
+
         print("✅ Base de datos poblada exitosamente con datos Mock.")
         
     except Exception as e:
