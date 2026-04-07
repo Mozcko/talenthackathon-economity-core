@@ -2,10 +2,71 @@
 
 ---
 
-<nav class="flex width-full align-center justify-between bg-amber-700">
-  <div class="m-3">Economity</div>
-  <div class="flex m-3">
-    <div class="m-1">Notificaciones</div>
-    <div class="m-1">Perfil</div>
+<nav
+  class="sticky top-0 z-50 w-full h-20 bg-surface-container-lowest border-b border-outline-variant flex items-center justify-between px-10"
+>
+  <!-- Left Side: Logo -->
+  <div
+    class="font-display font-bold text-2xl text-primary tracking-tight select-none"
+  >
+    Economity
   </div>
+
+  <!-- Right Side: Navigation Actions -->
+  <div class="flex items-center gap-8">
+    <button
+      class="group relative flex items-center gap-2.5 py-2 text-on-surface/50 font-display font-semibold transition-all duration-300 hover:text-secondary cursor-pointer"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="opacity-50 group-hover:opacity-100 transition-opacity"
+      >
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+      </svg>
+      <span>Notificaciones</span>
+
+      {/* Bottom Glow Indicator */}
+      <span
+        class="absolute -bottom-6.25 left-0 w-full h-1 bg-secondary opacity-0 transition-all duration-300
+                         group-hover:opacity-100 group-hover:shadow-[0_0_15px_var(--color-secondary-fixed-dim)]"
+      ></span>
+    </button>
+
+    <button
+      class="group relative flex items-center gap-2.5 py-2 text-on-surface/50 font-display font-semibold transition-all duration-300 hover:text-secondary cursor-pointer"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="opacity-50 group-hover:opacity-100 transition-opacity"
+      >
+        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+      <span>Perfil</span>
+
+      <span
+        class="absolute -bottom-[25px] left-0 w-full h-1 bg-secondary opacity-0 transition-all duration-300
+                         group-hover:opacity-100 group-hover:shadow-[0_0_15px_var(--color-secondary-fixed-dim)]"
+      ></span>
+    </button>
+  </div>
+
+  
 </nav>
