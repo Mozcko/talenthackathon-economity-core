@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
 from typing import Optional
 
 class Settings(BaseSettings):
@@ -22,6 +23,13 @@ class Settings(BaseSettings):
     # Hacemos DeepSeek y Claude opcionales por si no los usan en todos los flujos del MVP
     deepseek_api_key: Optional[str] = None
     claudecode_api_key: Optional[str] = None
+
+    @field_validator('clerk_jwks_url', 'jwt_secret_key', mode='before')
+    @classmethod
+    def strip_quotes(cls, v):
+        if isinstance(v, str):
+            return v.strip('"\'')
+        return v
 
     # Pydantic v2: Configuración para leer el archivo .env
     model_config = SettingsConfigDict(
