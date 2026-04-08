@@ -37,7 +37,7 @@ export default function VaultDashboard() {
   if (!dashboardData) return null;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <div className="m-5 ml-5 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       <header>
         <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Mi Vault</h1>
         <p className="text-gray-500 mt-1">Centro de Mando Patrimonial</p>
