@@ -1,4 +1,5 @@
 ---
+import Navbar from '../components/Astro/Navbar.astro';
 import "../styles/global.css";
 
 interface Props {
@@ -6,29 +7,28 @@ interface Props {
 }
 
 const { title } = Astro.props;
-import Navbar from '../components/Astro/Navbar.astro';
 ---
 
 <!doctype html>
-<html lang="en">
-  <head>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
-  </head>
-  <body>
-    <Navbar />
-    <slot />
-  </body>
-</html>
+  <html lang="en">
+    <head>
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;600;700&display=swap"
+        rel="stylesheet"
+      />
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width" />
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+      <meta name="generator" content={Astro.generator} />
+      <title>{title}</title>
+    </head>
+    <body>
+      <Navbar />
+      <slot />
+    </body>
+  </html>
 
 <style>
   html,

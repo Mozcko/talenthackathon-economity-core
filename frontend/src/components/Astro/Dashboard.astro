@@ -1,11 +1,22 @@
 ---
-const ListaT = [];
+import DashboardReact from '../React/Dashboard/Dashboard';
+import DataCapture from '../React/Dashboard/DataCapture';
+import Opportunities from '../React/Dashboard/Opportunities';
 ---
 
-<div
-  class="bg-color-surface-container-low flex-col items-center justify-center"
->
-dashboard
+<div class="p-6 md:p-8 w-full">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- left -->
+    <div class="lg:col-span-2">
+      <DashboardReact client:load />
+    </div>
+    <!-- right -->
+    <div class="lg:col-span-1">
+      <DataCapture client:load />
+    </div>
+  </div>
+  <!-- bottom -->
+  <div id="opportunities-section">
+    <Opportunities client:load />
+  </div>
 </div>
-
-<style></style>
