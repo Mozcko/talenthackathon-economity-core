@@ -1,18 +1,12 @@
 version: 2
 updates:
-  # Analiza las dependencias de Python en la carpeta backend
+  # Analiza las dependencias de Python en la raíz del repositorio
   - package-ecosystem: "pip"
-    directory: "/backend"
+    directory: "/"
     schedule:
       interval: "weekly"
 
-  # Analiza las dependencias de Node en la carpeta frontend
-  - package-ecosystem: "npm" # pnpm usa el ecosistema npm para Dependabot
-    directory: "/frontend"
-    schedule:
-      interval: "weekly"
-
-  # Actualiza también las acciones de GitHub que usamos en los workflows
+  # Mantiene actualizadas las Actions que usas en tus workflows
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
