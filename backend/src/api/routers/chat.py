@@ -41,6 +41,10 @@ manager = ConnectionManager()
 
 def validar_token_ws(token: str) -> str:
     """Valida el JWT en el entorno WebSocket y retorna el tenant_id."""
+    # Limpiamos el prefijo en caso de que el frontend envíe "Bearer eyJhb..."
+    if token.startswith("Bearer "):
+        token = token.replace("Bearer ", "")
+        
     try:
         payload = jwt.decode(
             token, 
@@ -49,7 +53,8 @@ def validar_token_ws(token: str) -> str:
             options={"verify_aud": False}
         )
         return payload.get("sub")
-    except Exception:
+    except Exception as e:
+        print(f"❌ Error al decodificar token WS: {str(e)}")
         return None
 
 @router.websocket("/asesor")

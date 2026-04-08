@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Analiza las dependencias de Python en la raíz del repositorio
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Mantiene actualizadas las Actions que usas en tus workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
