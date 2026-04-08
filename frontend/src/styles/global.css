@@ -33,6 +33,12 @@
 }
 
 @layer base {
+  /* Reset default browser margins and ensure full height for layout */
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
   /* Regla de Oro: El texto nunca es 100% negro y el fondo es la superficie base */
   body {
     background-color: var(--color-surface);
