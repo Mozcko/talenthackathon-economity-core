@@ -22,8 +22,8 @@ class Usuario(Base, AuditMixin):
     metas = relationship("MetaFinanciera", back_populates="usuario")
     
     # Gamificación
-    gamification_profile = relationship("UserGamificationProfile", back_populates="usuario", uselist=False)
-    logros = relationship("UserAchievement", back_populates="usuario")
+    perfil_gamificacion = relationship("PerfilGamificacion", back_populates="usuario", uselist=False)
+    logros = relationship("LogroUsuario", back_populates="usuario")
 
 class CuentaFinanciera(Base, AuditMixin):
     __tablename__ = "cuentas_financieras"

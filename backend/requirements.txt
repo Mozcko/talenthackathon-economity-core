@@ -21,3 +21,7 @@ openai>=1.10.0
 # --- Autenticación y Seguridad ---
 pyjwt
 cryptography
+
+# --- Testing ---
+pytest
+pytest-mock

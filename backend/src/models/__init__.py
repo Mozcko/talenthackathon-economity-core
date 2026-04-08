@@ -5,17 +5,17 @@ from .transaction import Categoria, SubCategoria, Transaccion
 from .investment import InstrumentoCatalogo, PortafolioInversion
 from .goal import MetaFinanciera
 from .gamification import (
-    UserGamificationProfile, 
-    GamificationEvent, 
-    AchievementDefinition, 
-    UserAchievement
+    PerfilGamificacion,
+    EventoGamificacion,
+    DefinicionLogro,
+    LogroUsuario
 )
 
 
 __all__ = [
     "Base", "AuditMixin", "Tenant", "Usuario", "CuentaFinanciera",
-    "Categoria", "SubCategoria", "Transaccion", "InstrumentoCatalogo", 
+    "Categoria", "SubCategoria", "Transaccion", "InstrumentoCatalogo",
     "PortafolioInversion", "MetaFinanciera",
-    "UserGamificationProfile", "GamificationEvent", 
-    "AchievementDefinition", "UserAchievement"
+    "PerfilGamificacion", "EventoGamificacion",
+    "DefinicionLogro", "LogroUsuario"
 ]
