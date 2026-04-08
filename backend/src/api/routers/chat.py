@@ -9,6 +9,7 @@ from src.core.database import get_db
 from src.core.config import settings
 from src.core.security import _get_jwks_client
 from src.models.user import Usuario
+from src.models.tenant import Tenant
 from src.services.dashboard import get_dashboard_summary
 
 # Importaciones de los Agentes IA y el Router Semántico
@@ -92,12 +93,16 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
                         await websocket.close()
                         return
 
-                    # Obtener el tenant_id UUID real desde la tabla de usuarios
+                    # Obtener o auto-provisionar usuario y tenant en el primer login
                     usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
                     if not usuario:
-                        await manager.send_message("❌ Usuario no encontrado. Desconectando...", websocket)
-                        await websocket.close()
-                        return
+                        nuevo_tenant = Tenant(nombre=f"Personal de {user_id}")
+                        db.add(nuevo_tenant)
+                        db.flush()  # Genera el UUID sin commit aún
+                        usuario = Usuario(id=user_id, tenant_id=nuevo_tenant.id)
+                        db.add(usuario)
+                        db.commit()
+                        db.refresh(usuario)
                     tenant_uuid = usuario.tenant_id
 
                     # Generamos el contexto financiero en tiempo real
