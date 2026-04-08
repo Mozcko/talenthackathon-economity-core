@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.core.config import settings
 from src.core.security import _get_jwks_client
+from src.models.user import Usuario
+from src.models.tenant import Tenant
 from src.services.dashboard import get_dashboard_summary
 
 # Importaciones de los Agentes IA y el Router Semántico
@@ -73,26 +75,38 @@ def validar_token_ws(token: str) -> str:
 @router.websocket("/asesor")
 async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
     await manager.connect(websocket)
-    tenant_id_str = None
+    user_id = None
+    tenant_uuid = None
     contexto_financiero = ""
-    
+
     try:
         while True:
             data = await websocket.receive_text()
             try:
                 payload = json.loads(data)
-                
+
                 # 1. Autenticación en el primer mensaje
-                if not tenant_id_str and "token" in payload:
-                    tenant_id_str = validar_token_ws(payload["token"])
-                    if not tenant_id_str:
+                if not user_id and "token" in payload:
+                    user_id = validar_token_ws(payload["token"])
+                    if not user_id:
                         await manager.send_message("❌ Token inválido o expirado. Desconectando...", websocket)
                         await websocket.close()
                         return
-                    
+
+                    # Obtener o auto-provisionar usuario y tenant en el primer login
+                    usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
+                    if not usuario:
+                        nuevo_tenant = Tenant(nombre=f"Personal de {user_id}")
+                        db.add(nuevo_tenant)
+                        db.flush()  # Genera el UUID sin commit aún
+                        usuario = Usuario(id=user_id, tenant_id=nuevo_tenant.id)
+                        db.add(usuario)
+                        db.commit()
+                        db.refresh(usuario)
+                    tenant_uuid = usuario.tenant_id
+
                     # Generamos el contexto financiero en tiempo real
-                    tenant_uuid = UUID(tenant_id_str) if isinstance(tenant_id_str, str) and '-' in tenant_id_str else tenant_id_str
-                    resumen = get_dashboard_summary(db, tenant_uuid, tenant_id_str)
+                    resumen = get_dashboard_summary(db, tenant_uuid, user_id)
                     
                     contexto_financiero = (
                         f"Contexto del usuario actual:\n"
@@ -113,7 +127,7 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
                 historial_raw = []
             
             # Si intenta hablar antes de mandar el token
-            if not tenant_id_str:
+            if not user_id:
                 await manager.send_message("⚠️ Por favor, envía tu token de autenticación primero.", websocket)
                 continue
 
@@ -142,7 +156,7 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
                 
             elif categoria == "ANALISIS_DATOS":
                 await manager.send_status("analizando tu historial de gastos...", websocket)
-                respuesta = await analizar_datos_async(contenido, historial_enriquecido, tenant_id_str)
+                respuesta = await analizar_datos_async(contenido, historial_enriquecido, user_id)
                 
             elif categoria == "SOPORTE_GENERAL":
                 await manager.send_status("escribiendo...", websocket)
