@@ -13,6 +13,7 @@ const mockPortafolio = [
 
 export default function VaultDashboard() {
   const [loading, setLoading] = useState(true);
+  const [visible, setVisible] = useState(false);
   const [dashboardData, setDashboardData] = useState<{ saldo_total: number; score_resiliencia: number } | null>(null);
   const [portfolioData, setPortfolioData] = useState<any[]>([]);
 
@@ -26,6 +27,14 @@ export default function VaultDashboard() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Trigger fade-in after loading finishes and content is rendered
+  useEffect(() => {
+    if (!loading) {
+      const raf = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -37,7 +46,14 @@ export default function VaultDashboard() {
   if (!dashboardData) return null;
 
   return (
-    <div className="m-5 ml-5 max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+    <div
+    className="m-5 ml-5 max-w-7xl mx-auto space-y-8"
+    style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'translateY(0)' : 'translateY(16px)',
+      transition: 'opacity 0.5s ease, transform 0.5s ease',
+    }}
+  >
       <header>
         <h1 className="text-3xl font-bold text-gray-800 tracking-tight">Mi Vault</h1>
         <p className="text-gray-500 mt-1">Centro de Mando Patrimonial</p>
@@ -70,8 +86,17 @@ export default function VaultDashboard() {
 
         <section className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col space-y-4">
           <h2 className="text-xl font-bold text-gray-800 mb-2">Portafolio de Inversiones</h2>
-          {portfolioData.map((inv) => (
-            <InvestmentCard key={inv.id} investment={inv} />
+          {portfolioData.map((inv, index) => (
+            <div
+              key={inv.id}
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'translateY(0)' : 'translateY(16px)',
+                transition: `opacity 0.5s ease ${index * 100}ms, transform 0.5s ease ${index * 100}ms`,
+              }}
+            >
+              <InvestmentCard investment={inv} />
+            </div>
           ))}
         </section>
       </div>

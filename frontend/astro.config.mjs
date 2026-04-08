@@ -12,16 +12,16 @@ export default defineConfig({
   integrations: [react(), clerk()],
   vite: {
     plugins: [tailwind()],
-  },
-  adapter: node({ mode: 'standalone' }),
-  output: 'server',
-  server: {
-    proxy: {
-      '/api': {
-        target: env.PUBLIC_API_URL,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+    server: {
+      proxy: {
+        '/api': {
+          target: env.PUBLIC_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+        },
       },
     },
   },
+  adapter: node({ mode: 'standalone' }),
+  output: 'server',
 });
