@@ -20,7 +20,7 @@ mock_payload = {
 
 test_token = jwt.encode(mock_payload, SECRET_KEY, algorithm="HS256")
 
-async def test_chat():
+async def run_chat_client():
     uri = "ws://127.0.0.1:8000/ws/asesor"
     
     print(f"🔄 Conectando a {uri}...")
@@ -50,4 +50,4 @@ async def test_chat():
                 break
 
 if __name__ == "__main__":
-    asyncio.run(test_chat())
+    asyncio.run(run_chat_client())

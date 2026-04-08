@@ -18,6 +18,7 @@ from src.api.routers import category as category_routes
 from src.api.routers import tenant as tenant_routes
 from src.api.routers import dashboard as dashboard_routes
 from src.api.routers import gamification as gamification_routes
+from src.api.routers import upload as upload_routes
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,6 +39,7 @@ app.include_router(category_routes.router)
 app.include_router(tenant_routes.router)
 app.include_router(dashboard_routes.router)
 app.include_router(gamification_routes.router)
+app.include_router(upload_routes.router)
 
 # --- RUTAS GENERALES ---
 
