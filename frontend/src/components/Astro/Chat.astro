@@ -1,14 +1,88 @@
 ---
-const ListaT = [];
+const messages = [
+  { sender: 'bot', text: 'Hello! I am your personal financial advisor. How can I assist you with your economy today?' },
+  { sender: 'user', text: 'How is my savings goal for this month looking?' },
+  { sender: 'bot', text: 'You are on track! You have saved 75% of your target. If you maintain this pace, you will reach it by next Friday.' },
+];
 ---
 
-<div
-  class="bg-color-surface-container-low flex-col items-center justify-center"
->
-<!-- Header -->
-<div class="flex">
-  
-</div>
+<div class="bg-color-surface-container-low flex flex-col h-full min-h-[600px] w-full shadow-lg rounded-xl overflow-hidden">
+  <!-- Header -->
+  <div class="flex items-center p-4 border-b border-gray-200 bg-white">
+    <h1 class="font-semibold text-gray-800 text-lg">Wealth Assistant</h1>
+  </div>
+
+  <!-- Chat space -->
+  <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+    {messages.map((msg) => (
+      <div class={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+        <div class={`max-w-[80%] px-4 py-2 rounded-2xl shadow-sm ${
+          msg.sender === 'user' 
+            ? 'bg-primary text-white rounded-tr-none' 
+            : 'bg-white text-black rounded-tl-none'
+        }`}>
+          <p class="text-sm">{msg.text}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Input space -->
+  <div class="p-4 bg-transparent">
+    <div class="flex items-center gap-2 bg-white rounded-xl p-2 shadow-inner border border-gray-100">
+      <!-- Attach document icon -->
+      <button class="p-2 text-gray-500 hover:text-gray-700 transition-colors" title="Attach Document">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.51a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </button>
+
+      <!-- Placeholder / Text input -->
+      <input 
+        type="text" 
+        placeholder="Ask your advisor!" 
+        class="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-700 outline-none"
+      />
+
+      <div class="flex items-center gap-1">
+        <!-- voice icon -->
+        <button 
+          class="p-2 text-gray-500 hover:text-red-500 transition-all duration-300 hover:drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]" 
+          title="Voice input"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+        </button>
+
+        <!-- send icon/button -->
+        <button 
+          class="bg-black text-white p-2 rounded-lg transition-all duration-300 border border-black hover:bg-white hover:text-black group"
+          title="Send message"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:scale-110 transition-transform">
+            <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<style></style>
+<style>
+  /* Custom glow for the microphone on hover */
+  .hover-glow:hover {
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8));
+  }
+
+  /* Scrollbar styling for the chat space */
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 4px;
+  }
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+  }
+</style>
