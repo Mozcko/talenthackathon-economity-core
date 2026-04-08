@@ -2,6 +2,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
+from jwt import PyJWKClient
 from typing import Dict, Any
 
 from src.core.config import settings
@@ -9,30 +10,52 @@ from src.core.config import settings
 # HTTPBearer le dice a FastAPI/Swagger que los endpoints requieren un token Bearer
 token_auth_scheme = HTTPBearer()
 
+# Lazy-initialized JWKS client (cached, fetches Clerk public keys automatically)
+_jwks_client: PyJWKClient | None = None
+
+def _get_jwks_client() -> PyJWKClient:
+    global _jwks_client
+    if _jwks_client is None:
+        _jwks_client = PyJWKClient(settings.clerk_jwks_url)
+    return _jwks_client
+
 def get_current_user_token(credentials: HTTPAuthorizationCredentials = Depends(token_auth_scheme)) -> Dict[str, Any]:
     """
-    Dependencia de FastAPI que intercepta el JWT emitido por Clerk, 
+    Dependencia de FastAPI que intercepta el JWT emitido por Clerk,
     valida la firma criptográfica y retorna el payload.
+    Soporta RS256 via JWKS (CLERK_JWKS_URL) o HS256 via JWT_SECRET_KEY.
     """
     token = credentials.credentials
-    
+
     try:
-        # Nota: En un entorno Clerk productivo real, se suelen usar claves asimétricas (RS256) 
-        # y se consulta el JWKS endpoint de Clerk. Para tu MVP, usar la clave secreta o la PEM 
-        # configurada en settings.jwt_secret_key funcionará perfectamente.
-        payload = jwt.decode(
-            token, 
-            settings.jwt_secret_key, 
-            algorithms=["HS256", "RS256"],
-            options={"verify_aud": False} # Opcional: desactiva validación estricta de audiencia en MVP
-        )
-        
-        # Clerk normalmente incluye el ID del usuario en el campo "sub"
+        if settings.clerk_jwks_url:
+            # RS256: obtiene la clave pública de Clerk automáticamente
+            signing_key = _get_jwks_client().get_signing_key_from_jwt(token)
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256"],
+                options={"verify_aud": False},
+            )
+        elif settings.jwt_secret_key:
+            # HS256: clave simétrica (requiere que Clerk esté configurado para HS256)
+            payload = jwt.decode(
+                token,
+                settings.jwt_secret_key,
+                algorithms=["HS256"],
+                options={"verify_aud": False},
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Auth no configurada: define CLERK_JWKS_URL o JWT_SECRET_KEY en .env",
+            )
+
         if "sub" not in payload:
             raise HTTPException(status_code=401, detail="Token no contiene identificador de usuario")
-            
+
         return payload
-        
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

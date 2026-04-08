@@ -13,8 +13,9 @@ class Settings(BaseSettings):
     # Vector Database Settings (Opcional, con valor por defecto)
     chroma_url: str = "http://localhost:8001"
     
-    # Auth Settings
-    jwt_secret_key: str
+    # Auth Settings - provide either clerk_jwks_url (preferred) or jwt_secret_key
+    clerk_jwks_url: Optional[str] = None
+    jwt_secret_key: Optional[str] = None
 
     # LLM API Keys
     openai_api_key: str
