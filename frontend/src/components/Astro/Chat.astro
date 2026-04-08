@@ -3,7 +3,7 @@ import ChatComponent from "../React/Chat/Chat.jsx";
 ---
 
 <div class="h-full flex flex-col">
-  <ChatComponent client:only="react" />
+  <ChatComponent client:only="react" publishableKey={import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY} />
 </div>
 
 <style>

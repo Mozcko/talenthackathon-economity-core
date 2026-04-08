@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ClerkProvider, useAuth } from "@clerk/react";
 
 function ChatContent() {
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -14,8 +14,23 @@ function ChatContent() {
 
   // 🔌 Connect WebSocket
   useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    
+    // Prevent redundant connections if one is already active
+    if (wsRef.current) return;
+
+    let isCancelled = false;
+
     async function connect() {
-      const token = await getToken();
+      let token;
+      try {
+        token = await getToken();
+      } catch (e) {
+        console.error("Failed to get Clerk token", e);
+        return;
+      }
+
+      if (isCancelled) return;
 
       const ws = new WebSocket(
         "wss://talenthackathon-economity-backend-production.up.railway.app/ws/asesor"
@@ -43,19 +58,38 @@ function ChatContent() {
         }
       };
 
-      ws.onclose = () => console.log("Disconnected");
+      // 2. Enhanced logging to debug Backend closures (Error 500 equivalents)
+      ws.onclose = (event) => {
+        console.log(`Disconnected. Code: ${event.code}, Reason: ${event.reason}`);
+        wsRef.current = null;
+        if (event.code === 1006) {
+          setStatus("Server error (500). Connection dropped.");
+        }
+      };
+
+      ws.onerror = (err) => console.error("WebSocket Error:", err);
 
       wsRef.current = ws;
     }
 
     connect();
 
-    return () => wsRef.current?.close();
-  }, []);
+    return () => {
+      isCancelled = true;
+      wsRef.current?.close(1000, "Frontend cleanup");
+      wsRef.current = null;
+    };
+  }, [isLoaded, isSignedIn]);
 
   // 📤 Send message
   const sendMessage = () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !wsRef.current) return;
+
+    if (wsRef.current.readyState !== WebSocket.OPEN) {
+      console.warn("Cannot send message: WebSocket state is", wsRef.current.readyState);
+      setStatus("Connection lost. Reconnecting...");
+      return;
+    }
 
     const newMessage = { sender: "user", text: input };
 
@@ -178,9 +212,9 @@ function ChatContent() {
   );
 }
 
-export default function Chat() {
+export default function Chat({ publishableKey }) {
   return (
-    <ClerkProvider publishableKey={import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY}>
+    <ClerkProvider publishableKey={publishableKey}>
       <ChatContent />
     </ClerkProvider>
   );
