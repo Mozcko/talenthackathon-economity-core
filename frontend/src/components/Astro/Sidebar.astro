@@ -3,6 +3,8 @@ import dashboardIcon from "../../assets/dashboardIcon.png";
 import portafolioIcon from "../../assets/portafolioIcon.png";
 import insightIcon from "../../assets/insightsIcon.png";
 import transactionsIcon from "../../assets/transactionIcon.png";
+import communityIcon from "../../assets/community.png";
+
 
 interface Props {
     currentTab?: string;
@@ -13,6 +15,7 @@ const { currentTab = 'dashboard' } = Astro.props;
 const navItems = [
     { name: 'Dashboard', id: 'dashboard', icon: dashboardIcon },
     { name: 'Vault', id: 'vault', icon: portafolioIcon },
+    { name: 'Community', id: 'community', icon: communityIcon },
     // { name: 'Insights', id: 'insights', icon: insightIcon },
     { name: 'Transactions', id: 'transactions', icon: transactionsIcon },
     { name: 'Chat', id: 'chat', icon: insightIcon },
