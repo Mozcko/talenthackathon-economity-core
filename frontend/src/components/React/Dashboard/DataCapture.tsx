@@ -154,22 +154,24 @@ export default function DataCapture() {
     setIsProcessing(true);
     setError(null);
     try {
+      const token = await (window as any).Clerk?.session?.getToken() as string | null;
+      const authHeader: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       let response: Response;
 
       if (captureMode === 'text') {
         response = await fetch('/api/upload/texto', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...authHeader },
           body: JSON.stringify({ texto: textInput }),
         });
       } else if (captureMode === 'audio' && audioBlob) {
         const formData = new FormData();
         formData.append('file', audioBlob, 'audio.webm');
-        response = await fetch('/api/upload/audio', { method: 'POST', body: formData });
+        response = await fetch('/api/upload/audio', { method: 'POST', headers: authHeader, body: formData });
       } else if (captureMode === 'camera' && imageFile) {
         const formData = new FormData();
         formData.append('file', imageFile);
-        response = await fetch('/api/upload/imagen', { method: 'POST', body: formData });
+        response = await fetch('/api/upload/imagen', { method: 'POST', headers: authHeader, body: formData });
       } else {
         return;
       }
