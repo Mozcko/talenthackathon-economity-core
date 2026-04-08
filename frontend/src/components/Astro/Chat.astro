@@ -2,4 +2,17 @@
 import ChatComponent from "../React/Chat/Chat.jsx";
 ---
 
-<ChatComponent client:only="react" />
+<div class="h-full flex flex-col">
+  <ChatComponent client:only="react" />
+</div>
+
+<style>
+  /* astro-island is a custom element (display: inline by default).
+     Without this, h-full inside the React component has no height to inherit. */
+  div :global(astro-island) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+</style>

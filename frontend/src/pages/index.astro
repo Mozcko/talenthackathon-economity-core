@@ -14,7 +14,7 @@ const currentTab = Astro.url.searchParams.get('tab') || 'dashboard';
 <Layout title="Economity Dashboard">
 	<div class="flex h-[calc(100vh-80px)] overflow-hidden">
 		<Sidebar currentTab={currentTab} />
-		<main class="flex-1 overflow-y-auto w-full">
+		<main class="flex-1 flex flex-col min-h-0 overflow-hidden w-full">
 			{currentTab === 'dashboard' && <Dashboard />}
 			{currentTab === 'transactions' && <Transaction />}
 			{currentTab === 'insights' && <Insights />}

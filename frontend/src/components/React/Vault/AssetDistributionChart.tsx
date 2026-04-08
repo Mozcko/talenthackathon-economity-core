@@ -57,7 +57,7 @@ export default function AssetDistributionChart({ data }: ChartDataProps) {
     new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
 
   return (
-    <div className="w-full h-[300px]">
+    <div className="w-full h-75">
       {isReady && (
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
