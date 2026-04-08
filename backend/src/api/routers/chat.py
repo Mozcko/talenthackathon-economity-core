@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from src.core.database import get_db
 from src.core.config import settings
+from src.core.security import _get_jwks_client
 from src.services.dashboard import get_dashboard_summary
 
 # Importaciones de los Agentes IA y el Router Semántico
@@ -41,17 +42,29 @@ manager = ConnectionManager()
 
 def validar_token_ws(token: str) -> str:
     """Valida el JWT en el entorno WebSocket y retorna el tenant_id."""
-    # Limpiamos el prefijo en caso de que el frontend envíe "Bearer eyJhb..."
     if token.startswith("Bearer "):
         token = token.replace("Bearer ", "")
-        
+
     try:
-        payload = jwt.decode(
-            token, 
-            settings.jwt_secret_key, 
-            algorithms=["HS256", "RS256"], 
-            options={"verify_aud": False}
-        )
+        if settings.clerk_jwks_url:
+            signing_key = _get_jwks_client().get_signing_key_from_jwt(token)
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256"],
+                options={"verify_aud": False},
+            )
+        elif settings.jwt_secret_key:
+            payload = jwt.decode(
+                token,
+                settings.jwt_secret_key,
+                algorithms=["HS256"],
+                options={"verify_aud": False},
+            )
+        else:
+            print("❌ Auth no configurada: define CLERK_JWKS_URL o JWT_SECRET_KEY en .env")
+            return None
+
         return payload.get("sub")
     except Exception as e:
         print(f"❌ Error al decodificar token WS: {str(e)}")
