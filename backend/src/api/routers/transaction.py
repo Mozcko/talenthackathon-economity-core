@@ -12,6 +12,7 @@ from src.core.database import get_db
 from src.core.security import get_current_user_token
 from src.schemas.transaction import TransaccionCreate, TransaccionResponse
 from src.services import transaction as transaction_service
+from src.services.category import resolve_sub_categoria_id
 
 # Importamos nuestro ecosistema de IA desde la nueva ubicación segura
 from src.services.ai import multimodal_parser as ai_service
@@ -96,7 +97,7 @@ def registrar_transaccion_por_voz(
         # 5. Preparar el schema para guardar en Base de Datos
         nueva_transaccion = TransaccionCreate(
             cuenta_id=cuenta_id,
-            sub_categoria_id=datos_ia.sub_categoria_id,
+            sub_categoria_id=resolve_sub_categoria_id(db, datos_ia.categoria_sugerida, datos_ia.es_ingreso),
             tenant_id=tenant_uuid,
             monto=datos_ia.monto,
             fecha_operacion=datetime.now(),
@@ -152,7 +153,7 @@ def registrar_transaccion_por_ticket(
         
         nueva_transaccion = TransaccionCreate(
             cuenta_id=cuenta_id,
-            sub_categoria_id=datos_ia.sub_categoria_id,
+            sub_categoria_id=resolve_sub_categoria_id(db, datos_ia.categoria_sugerida, datos_ia.es_ingreso),
             tenant_id=tenant_uuid,
             monto=datos_ia.monto,
             fecha_operacion=datetime.now(),
