@@ -15,17 +15,35 @@ class TextoPayload(BaseModel):
     texto: str
 
 
-def _resolve_sub_categoria_id(db: Session, categoria_sugerida: str) -> int:
-    """Map the AI-suggested category name to a sub_categoria DB id."""
-    from src.models.transaction import SubCategoria
-    # Try partial case-insensitive match against sub_categoria nombre
-    sub_cat = db.query(SubCategoria).filter(
-        SubCategoria.nombre.ilike(f"%{categoria_sugerida}%")
-    ).first()
+def _resolve_sub_categoria_id(db: Session, categoria_sugerida: str, es_ingreso: bool) -> int | None:
+    """
+    Map the AI-suggested category to a sub_categoria id, respecting income vs expense.
+    """
+    from src.models.transaction import SubCategoria, Categoria
+
+    tipo_flujo = "Ingreso" if es_ingreso else "Egreso"
+
+    # 1. Try partial match within the correct flow type
+    sub_cat = (
+        db.query(SubCategoria)
+        .join(Categoria, SubCategoria.categoria_id == Categoria.id)
+        .filter(
+            Categoria.tipo_flujo == tipo_flujo,
+            SubCategoria.nombre.ilike(f"%{categoria_sugerida}%"),
+        )
+        .first()
+    )
+
+    # 2. Fallback: first sub_categoria of the correct flow type
     if not sub_cat:
-        # Fallback: first available sub_categoria
-        sub_cat = db.query(SubCategoria).first()
-    return sub_cat.id if sub_cat else 1
+        sub_cat = (
+            db.query(SubCategoria)
+            .join(Categoria, SubCategoria.categoria_id == Categoria.id)
+            .filter(Categoria.tipo_flujo == tipo_flujo)
+            .first()
+        )
+
+    return sub_cat.id if sub_cat else None
 
 
 @router.post("/texto")
@@ -37,7 +55,7 @@ async def procesar_texto(
     """Recibe texto, usa el Agente IA para extraer monto y descripción, y lo devuelve al frontend."""
     try:
         datos = await extraction_agent.extraer_datos_texto_async(payload.texto)
-        datos["sub_categoria_id"] = _resolve_sub_categoria_id(db, datos.get("categoria_sugerida", ""))
+        datos["sub_categoria_id"] = _resolve_sub_categoria_id(db, datos.get("categoria_sugerida", ""), datos.get("es_ingreso", False))
         return datos
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -55,7 +73,7 @@ async def procesar_audio(
 
     try:
         datos = await extraction_agent.extraer_datos_audio_async(temp_path)
-        datos["sub_categoria_id"] = _resolve_sub_categoria_id(db, datos.get("categoria_sugerida", ""))
+        datos["sub_categoria_id"] = _resolve_sub_categoria_id(db, datos.get("categoria_sugerida", ""), datos.get("es_ingreso", False))
         return datos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error procesando audio: {str(e)}")
@@ -76,7 +94,7 @@ async def procesar_imagen(
 
     try:
         datos = await extraction_agent.extraer_datos_imagen_async(temp_path)
-        datos["sub_categoria_id"] = _resolve_sub_categoria_id(db, datos.get("categoria_sugerida", ""))
+        datos["sub_categoria_id"] = _resolve_sub_categoria_id(db, datos.get("categoria_sugerida", ""), datos.get("es_ingreso", False))
         return datos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error procesando imagen: {str(e)}")
