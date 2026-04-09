@@ -39,14 +39,63 @@ export async function getAppContext(): Promise<AppContext> {
     if (!userId) throw new Error('No hay sesión activa');
 
     const headers = await getAuthHeaders();
-    const res = await fetch(`/api/usuarios/${userId}/cuentas/`, { headers });
-    if (!res.ok) throw new Error(`Error cargando cuenta: ${res.status}`);
 
-    const data = await res.json();
-    const cuenta = Array.isArray(data) ? data[0] : data;
-    if (!cuenta) throw new Error('No se encontró ninguna cuenta para este usuario');
+    // Check if user exists in the backend
+    const userRes = await fetch(`/api/usuarios/${userId}`, { headers });
 
-    const ctx: AppContext = { userId, cuentaId: cuenta.id, tenantId: cuenta.tenant_id };
+    let tenantId: string;
+    let cuentaId: string;
+
+    if (userRes.status === 404) {
+      // New user — provision tenant → user → default account
+      const tenantRes = await fetch('/api/organizaciones/', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: 'Personal', plan_suscripcion: 'gratis' }),
+      });
+      if (!tenantRes.ok) throw new Error(`Error al crear organización: ${tenantRes.status}`);
+      tenantId = (await tenantRes.json()).id;
+
+      const createUserRes = await fetch('/api/usuarios/', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, tenant_id: tenantId }),
+      });
+      if (!createUserRes.ok) throw new Error(`Error al registrar usuario: ${createUserRes.status}`);
+
+      const cuentaRes = await fetch(`/api/usuarios/${userId}/cuentas/`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: 'Efectivo', tipo: 'Efectivo', saldo_actual: 0, usuario_id: userId, tenant_id: tenantId }),
+      });
+      if (!cuentaRes.ok) throw new Error(`Error al crear cuenta: ${cuentaRes.status}`);
+      cuentaId = (await cuentaRes.json()).id;
+
+    } else if (userRes.ok) {
+      tenantId = (await userRes.json()).tenant_id;
+
+      const cuentasRes = await fetch(`/api/usuarios/${userId}/cuentas/`, { headers });
+      if (!cuentasRes.ok) throw new Error(`Error cargando cuentas: ${cuentasRes.status}`);
+      const cuentas = await cuentasRes.json();
+      const first = Array.isArray(cuentas) ? cuentas[0] : undefined;
+
+      if (!first) {
+        // User exists but no accounts — create default
+        const cuentaRes = await fetch(`/api/usuarios/${userId}/cuentas/`, {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre: 'Efectivo', tipo: 'Efectivo', saldo_actual: 0, usuario_id: userId, tenant_id: tenantId }),
+        });
+        if (!cuentaRes.ok) throw new Error(`Error al crear cuenta: ${cuentaRes.status}`);
+        cuentaId = (await cuentaRes.json()).id;
+      } else {
+        cuentaId = first.id;
+      }
+    } else {
+      throw new Error(`Error cargando usuario: ${userRes.status}`);
+    }
+
+    const ctx: AppContext = { userId, cuentaId, tenantId };
     sessionStorage.setItem('economity_ctx', JSON.stringify(ctx));
     return ctx;
   })();
