@@ -11,7 +11,7 @@ class TransaccionBase(BaseModel):
 
 class TransaccionCreate(TransaccionBase):
     cuenta_id: UUID
-    sub_categoria_id: int
+    sub_categoria_id: Optional[int] = None
     tenant_id: UUID
 
 class TransaccionResponse(TransaccionBase):

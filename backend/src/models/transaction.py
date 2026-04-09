@@ -32,7 +32,7 @@ class Transaccion(Base, AuditMixin):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     cuenta_id = Column(UUID(as_uuid=True), ForeignKey("cuentas_financieras.id"), nullable=False)
-    sub_categoria_id = Column(Integer, ForeignKey("sub_categorias.id"), nullable=False)
+    sub_categoria_id = Column(Integer, ForeignKey("sub_categorias.id"), nullable=True)
     tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id"), nullable=False, index=True)
     
     monto = Column(Numeric(12, 2), nullable=False)

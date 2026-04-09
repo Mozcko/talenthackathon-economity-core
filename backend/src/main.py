@@ -36,6 +36,11 @@ async def lifespan(app: FastAPI):
                 raise RuntimeError(f"No se pudo conectar a la base de datos después de 10 intentos: {e}") from e
             print(f"⏳ Esperando DB (intento {attempt + 1}/10): {e}")
             time.sleep(3)
+
+    # Bootstrap required system lookup data (idempotent, safe for production)
+    from src.services.system_init import initialize_system_data
+    initialize_system_data()
+
     yield
 
 
