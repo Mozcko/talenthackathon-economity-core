@@ -1,9 +1,11 @@
 # src/services/dashboard.py
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from uuid import UUID
 from decimal import Decimal
- 
+
 from src.models.user import Usuario, CuentaFinanciera
+from src.models.transaction import Transaccion
 from src.models.goal import MetaFinanciera
 from src.models.investment import InstrumentoCatalogo
 
@@ -16,9 +18,13 @@ def get_dashboard_summary(db: Session, tenant_id: UUID, user_id: str):
     score = usuario.score_resiliencia if usuario else 0
     flujo = usuario.flujo_caja_libre_mensual if usuario else Decimal('0.0')
 
-    # 2. Calcular Saldo Total (Suma de todas sus cuentas financieras)
-    cuentas = db.query(CuentaFinanciera).filter(CuentaFinanciera.tenant_id == tenant_id).all()
-    saldo_total = sum((c.saldo_actual for c in cuentas), Decimal('0.0'))
+    # 2. Calcular Saldo Total sumando directamente las transacciones (siempre actualizado)
+    saldo_raw = (
+        db.query(func.sum(Transaccion.monto))
+        .filter(Transaccion.tenant_id == tenant_id)
+        .scalar()
+    )
+    saldo_total = Decimal(str(saldo_raw)) if saldo_raw is not None else Decimal('0.0')
 
     # 3. Obtener la meta más próxima a vencer
     meta_proxima = db.query(MetaFinanciera).filter(

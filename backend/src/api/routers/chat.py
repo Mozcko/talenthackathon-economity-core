@@ -105,18 +105,6 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
                         db.refresh(usuario)
                     tenant_uuid = usuario.tenant_id
 
-                    # Generamos el contexto financiero en tiempo real
-                    resumen = get_dashboard_summary(db, tenant_uuid, user_id)
-                    
-                    contexto_financiero = (
-                        f"Contexto del usuario actual:\n"
-                        f"- Saldo Total: ${resumen['saldo_total']}\n"
-                        f"- Flujo de Caja Libre: ${resumen['flujo_caja_mensual']}\n"
-                        f"- Score de Resiliencia: {resumen['score_resiliencia']}\n"
-                    )
-                    if resumen.get('meta_proxima'):
-                        contexto_financiero += f"- Meta próxima: {resumen['meta_proxima'].nombre} (Objetivo: ${resumen['meta_proxima'].monto_objetivo})\n"
-                    
                     await manager.send_status("autenticado", websocket)
                     continue # Esperamos el siguiente mensaje que ya contendrá la pregunta del usuario
 
@@ -132,7 +120,18 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
                 continue
 
             historial_texto = formatear_historial(historial_raw)
-            
+
+            # Recalculamos el contexto financiero en cada mensaje para que siempre sea actual
+            resumen = get_dashboard_summary(db, tenant_uuid, user_id)
+            contexto_financiero = (
+                f"Contexto financiero actual del usuario:\n"
+                f"- Saldo Total (suma de transacciones): ${resumen['saldo_total']}\n"
+                f"- Flujo de Caja Libre: ${resumen['flujo_caja_mensual']}\n"
+                f"- Score de Resiliencia: {resumen['score_resiliencia']}\n"
+            )
+            if resumen.get('meta_proxima'):
+                contexto_financiero += f"- Meta próxima: {resumen['meta_proxima'].nombre} (Objetivo: ${resumen['meta_proxima'].monto_objetivo})\n"
+
             # Inyectamos la realidad del usuario al historial para que todos los agentes la lean
             historial_enriquecido = f"{contexto_financiero}\n\nHistorial de charla:\n{historial_texto}"
 
