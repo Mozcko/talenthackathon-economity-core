@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
+import { apiFetch, getAppContext } from '../../../lib/api';
 
 type ProcessResult = {
   monto: number;
   descripcion: string;
+  sub_categoria_id?: number;
 };
 
 export default function DataCapture() {
@@ -13,6 +15,7 @@ export default function DataCapture() {
   const [textInput, setTextInput] = useState('');
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -341,7 +344,36 @@ export default function DataCapture() {
           </div>
           <div className="flex gap-4 justify-center">
             <button onClick={resetCapture} className="btn-secondary text-sm px-6 py-2">Descartar</button>
-            <button onClick={resetCapture} className="btn-primary text-sm px-6 py-2">Confirmar</button>
+            <button
+              onClick={async () => {
+                if (!result) return;
+                setIsConfirming(true);
+                try {
+                  const { cuentaId, tenantId } = await getAppContext();
+                  await apiFetch('/transacciones/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      monto: result.monto,
+                      fecha_operacion: new Date().toISOString(),
+                      descripcion: result.descripcion,
+                      cuenta_id: cuentaId,
+                      sub_categoria_id: result.sub_categoria_id ?? 1,
+                      tenant_id: tenantId,
+                    }),
+                  });
+                  resetCapture();
+                } catch (err: any) {
+                  setError(err.message);
+                } finally {
+                  setIsConfirming(false);
+                }
+              }}
+              disabled={isConfirming}
+              className="btn-primary text-sm px-6 py-2"
+            >
+              {isConfirming ? 'Guardando...' : 'Confirmar'}
+            </button>
           </div>
         </div>
       )}

@@ -15,10 +15,12 @@ const { currentTab = 'dashboard' } = Astro.props;
 const navItems = [
     { name: 'Dashboard', id: 'dashboard', icon: dashboardIcon },
     { name: 'Vault', id: 'vault', icon: portafolioIcon },
-    { name: 'Community', id: 'community', icon: communityIcon },
     // { name: 'Insights', id: 'insights', icon: insightIcon },
     { name: 'Transactions', id: 'transactions', icon: transactionsIcon },
+    { name: 'Metas', id: 'metas', icon: insightIcon },
+    { name: 'Logros', id: 'logros', icon: insightIcon },
     { name: 'Chat', id: 'chat', icon: insightIcon },
+    { name: 'Community', id: 'community', icon: communityIcon },
 ];
 ---
 <aside class="w-50 h-full bg-surface-container-lowest border-r border-outline-variant flex flex-col py-10">
