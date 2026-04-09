@@ -10,7 +10,7 @@ from src.services import investment as investment_service
 from src.schemas.investment import PortafolioInversionCreate, PortafolioInversionResponse
 
 router = APIRouter(prefix="/inversiones", tags=["Inversiones y Portafolio"])
-
+ 
 # --- ENDPOINT 1: TIER LIST ---
 
 @router.get("/tierlist", summary="Generar Tier List Dinámica (Oportunidades)")
