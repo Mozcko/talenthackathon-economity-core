@@ -1,71 +1,42 @@
-# Economity - Zero-Friction Financial Tracking
+# Economity - Tu Copiloto Financiero Inteligente
 
-Economity is a modern, AI-powered financial management frontend designed to eliminate the friction of manual expense tracking. By leveraging GPT-4o and Whisper, users can log transactions through natural language, voice memos, or photos of receipts.
+**Economity** es una plataforma integral de gestión financiera personal diseñada para transformar la relación de los usuarios con su dinero. Utilizando inteligencia artificial, gamificación y una interfaz de usuario moderna, la aplicación simplifica el seguimiento de gastos y el cumplimiento de objetivos financieros.
 
-## 🚀 Features
+## Características Principales
 
-### 1. Zero-Friction Logging (AI Powered)
-*   **Voice-to-Transaction:** Record a quick audio (e.g., "Spent 50 dollars on dinner at Mario's") and let the system transcribe and categorize it automatically.
-*   **Smart Vision:** Snap a photo of a ticket or receipt. The system extracts the vendor, amount, and date using GPT-4o Vision.
-*   **Natural Language:** Type a quick sentence to log movements without filling out complex forms.
+### 1. Captura de Datos Multimodal (IA)
+Registra tus movimientos financieros de la manera que prefieras:
+*   **Escaneo de Recibos:** Toma una foto de tus tickets y la IA extraerá automáticamente el monto y la descripción.
+*   **Notas de Voz:** Describe tu gasto hablando y nuestro sistema lo procesará mediante procesamiento de lenguaje natural.
+*   **Entrada de Texto Natural:** Escribe frases simples como "Gasté 500 pesos en gasolina" y deja que la aplicación haga el resto.
 
-### 2. Behavioral Gamification
-*   **XP & Levels:** Earn experience points for every transaction logged. Level up from Bronze to Mythic.
-*   **Daily Streaks:** Maintain your tracking habit to build streaks and earn bonus XP.
-*   **Achievements:** Unlock badges like "Honestidad Brutal" (logging a risky expense) or "Semana Perfecta".
-*   **Next Milestone:** Real-time progress tracking toward your next financial level.
+### 2. Panel de Control y Bóveda (Vault)
+Visualiza tu salud financiera de un vistazo:
+*   **Seguimiento en Tiempo Real:** Gráficas de distribución de gastos por categoría.
+*   **Historial Detallado:** Lista cronológica de transacciones con visualización clara de comercios y categorías.
+*   **Resumen Mensual:** Control total sobre tu presupuesto restante y gasto total acumulado.
 
-### 3. Smart Categorization
-*   Automated mapping of AI-suggested categories to a structured catalog (Supervivencia, Crecimiento, Riesgo, etc.).
-*   Risk detection for "Dopamine" spending (Gambling, alcohol, impulsive subscriptions).
+### 3. Metas Financieras
+Define y alcanza tus objetivos:
+*   **Creación de Metas:** Establece montos objetivos y fechas límite (ej. Fondo de Emergencia, Vacaciones).
+*   **Seguimiento de Progreso:** Barras visuales que muestran qué tan cerca estás de cumplir tus sueños financieros.
+*   **Aportaciones Flexibles:** Agrega progreso a tus metas en cualquier momento.
 
-### 4. Secure & Multi-tenant
-*   Integrated with Clerk for secure authentication.
-*   Zero-Trust architecture ensuring data is siloed by tenant UUID.
+### 4. Asesor Financiero IA (Chat)
+Interactúa con un asesor inteligente disponible 24/7 a través de WebSockets para recibir:
+*   Consejos personalizados basados en tus hábitos.
+*   Resolución de dudas sobre tus finanzas.
+*   Soporte interactivo en tiempo real.
 
-## 🛠️ Tech Stack
+### 5. Gamificación y Progreso
+Convierte tus finanzas en un juego para mantener la motivación:
+*   **Sistema de Experiencia (XP):** Gana puntos por registrar tus gastos y cumplir metas.
+*   **Niveles y Rangos:** Sube desde Bronce hasta Oro a medida que mejoras tu comportamiento financiero.
+*   **Rachas:** Mantén la constancia con contadores de racha diaria y máxima.
 
-*   **Framework:** React / Next.js
-*   **Styling:** Tailwind CSS
-*   **Authentication:** Clerk Auth
-*   **State Management:** (e.g., TanStack Query / SWR for API synchronization)
-*   **Icons:** Lucide React
+## Tecnologías Utilizadas
 
-## 📦 Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-repo/economity-frontend.git
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Configure Environment Variables:**
-    Create a `.env.local` file:
-    ```env
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
-    NEXT_PUBLIC_API_URL=http://localhost:8000
-    ```
-4.  **Run development server:**
-    ```bash
-    npm run dev
-    ```
-
-## 🔌 API Integration Points
-
-The frontend interacts with the following core backend modules:
-
-*   **`/upload`**: Endpoints for processing text, audio files, and images via AI agents.
-*   **`/transacciones`**: CRUD operations for financial records, including specialized voice/image registration.
-*   **`/gamificacion`**: Fetches user profiles, streaks, and achievement progress.
-*   **`/categorias`**: Retrieves the full catalog of categories and subcategories for manual overrides.
-
-## 🎨 UI Philosophy
-
-*   **Mobile-First:** Designed for quick entry on the go.
-*   **Feedback Loops:** Visual celebrations (confetti, XP bars) when transactions are logged to reinforce positive behavior.
-*   **Transparency:** Clearly distinguish between "Essential" spending and "Risk" spending to promote financial awareness.
-
----
-*Part of the Talent Hackathon Economity Core Project.*
+*   **Frontend:** React con TypeScript.
+*   **Estilos:** Tailwind CSS (v4) con una arquitectura de diseño basada en superficies y capas.
+*   **Autenticación:** Clerk para una gestión de usuarios segura.
+*   **Comunicación:** WebSockets para el chat en tiempo real.
