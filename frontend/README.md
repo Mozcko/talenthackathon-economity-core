@@ -1,43 +1,71 @@
-# Astro Starter Kit: Minimal
+# Economity - Zero-Friction Financial Tracking
 
-```sh
-pnpm create astro@latest -- --template minimal
-```
+Economity is a modern, AI-powered financial management frontend designed to eliminate the friction of manual expense tracking. By leveraging GPT-4o and Whisper, users can log transactions through natural language, voice memos, or photos of receipts.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 🚀 Features
 
-## 🚀 Project Structure
+### 1. Zero-Friction Logging (AI Powered)
+*   **Voice-to-Transaction:** Record a quick audio (e.g., "Spent 50 dollars on dinner at Mario's") and let the system transcribe and categorize it automatically.
+*   **Smart Vision:** Snap a photo of a ticket or receipt. The system extracts the vendor, amount, and date using GPT-4o Vision.
+*   **Natural Language:** Type a quick sentence to log movements without filling out complex forms.
 
-Inside of your Astro project, you'll see the following folders and files:
+### 2. Behavioral Gamification
+*   **XP & Levels:** Earn experience points for every transaction logged. Level up from Bronze to Mythic.
+*   **Daily Streaks:** Maintain your tracking habit to build streaks and earn bonus XP.
+*   **Achievements:** Unlock badges like "Honestidad Brutal" (logging a risky expense) or "Semana Perfecta".
+*   **Next Milestone:** Real-time progress tracking toward your next financial level.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+### 3. Smart Categorization
+*   Automated mapping of AI-suggested categories to a structured catalog (Supervivencia, Crecimiento, Riesgo, etc.).
+*   Risk detection for "Dopamine" spending (Gambling, alcohol, impulsive subscriptions).
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+### 4. Secure & Multi-tenant
+*   Integrated with Clerk for secure authentication.
+*   Zero-Trust architecture ensuring data is siloed by tenant UUID.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## 🛠️ Tech Stack
 
-Any static assets, like images, can be placed in the `public/` directory.
+*   **Framework:** React / Next.js
+*   **Styling:** Tailwind CSS
+*   **Authentication:** Clerk Auth
+*   **State Management:** (e.g., TanStack Query / SWR for API synchronization)
+*   **Icons:** Lucide React
 
-## 🧞 Commands
+## 📦 Installation
 
-All commands are run from the root of the project, from a terminal:
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-repo/economity-frontend.git
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+3.  **Configure Environment Variables:**
+    Create a `.env.local` file:
+    ```env
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
+    NEXT_PUBLIC_API_URL=http://localhost:8000
+    ```
+4.  **Run development server:**
+    ```bash
+    npm run dev
+    ```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## 🔌 API Integration Points
 
-## 👀 Want to learn more?
+The frontend interacts with the following core backend modules:
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+*   **`/upload`**: Endpoints for processing text, audio files, and images via AI agents.
+*   **`/transacciones`**: CRUD operations for financial records, including specialized voice/image registration.
+*   **`/gamificacion`**: Fetches user profiles, streaks, and achievement progress.
+*   **`/categorias`**: Retrieves the full catalog of categories and subcategories for manual overrides.
+
+## 🎨 UI Philosophy
+
+*   **Mobile-First:** Designed for quick entry on the go.
+*   **Feedback Loops:** Visual celebrations (confetti, XP bars) when transactions are logged to reinforce positive behavior.
+*   **Transparency:** Clearly distinguish between "Essential" spending and "Risk" spending to promote financial awareness.
+
+---
+*Part of the Talent Hackathon Economity Core Project.*
