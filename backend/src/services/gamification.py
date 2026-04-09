@@ -107,19 +107,30 @@ def update_streak(db: Session, user_id: str):
 
     return perfil
 
+def award_honesty_xp(db: Session, user_id: str, transaction_id: str):
+    """Otorga XP extra por la honestidad de registrar un gasto riesgoso."""
+    return award_xp(
+        db, 
+        user_id, 
+        amount=20, 
+        event_type="honesty_bonus", 
+        reference_id=transaction_id
+    )
+
 def check_achievements(db: Session, user_id: str):
-    """Verifica si el usuario ha desbloqueado nuevos logros."""
+    """Verifica si el usuario ha desbloqueado nuevos logros conductuales."""
     perfil = get_profile(db, user_id)
 
     # 1. Obtener logros ya desbloqueados
     codigos_desbloqueados = [lu.codigo_logro for lu in db.query(LogroUsuario).filter(LogroUsuario.usuario_id == user_id).all()]
 
-    # 2. Definir lógica de evaluación rápida (MVP)
+    # 2. Definir lógica de evaluación conductual (MVP)
     logros_potenciales = [
         {"code": "first_expense", "condition": lambda p, db: db.query(func.count(EventoGamificacion.id)).filter(EventoGamificacion.usuario_id == user_id, EventoGamificacion.tipo_evento.in_(["expense_created", "audio_log", "image_log"])).scalar() >= 1},
         {"code": "streak_3", "condition": lambda p, db: p.racha_maxima >= 3},
         {"code": "streak_7", "condition": lambda p, db: p.racha_maxima >= 7},
         {"code": "silver_tier", "condition": lambda p, db: p.total_xp >= 100},
+        {"code": "first_risky_logged", "condition": lambda p, db: db.query(func.count(EventoGamificacion.id)).filter(EventoGamificacion.usuario_id == user_id, EventoGamificacion.tipo_evento == "honesty_bonus").scalar() >= 1},
     ]
 
     for logro in logros_potenciales:
@@ -144,7 +155,7 @@ def unlock_achievement(db: Session, user_id: str, code: str):
     award_xp(db, user_id, amount=definicion.xp_recompensa, event_type="achievement_unlock", reference_id=code)
 
 def get_next_milestone(db: Session, user_id: str):
-    """Determina el siguiente paso lógico para el usuario."""
+    """Determina el siguiente paso lógico para el usuario en español."""
     perfil = get_profile(db, user_id)
 
     # Lógica de hito MVP
@@ -152,7 +163,7 @@ def get_next_milestone(db: Session, user_id: str):
         objetivo = 100
         progreso = (perfil.total_xp / objetivo) * 100
         return {
-            "mensaje": f"Te faltan {objetivo - perfil.total_xp} XP para llegar a Silver",
+            "mensaje": f"Te faltan {objetivo - perfil.total_xp} XP para llegar a Bronce Pro (Plata)",
             "xp_objetivo": objetivo,
             "progreso": min(progreso, 100),
             "completado": False
@@ -161,14 +172,14 @@ def get_next_milestone(db: Session, user_id: str):
         objetivo = 300
         progreso = ((perfil.total_xp - 100) / (objetivo - 100)) * 100
         return {
-            "mensaje": f"Te faltan {objetivo - perfil.total_xp} XP para llegar a Gold",
+            "mensaje": f"Te faltan {objetivo - perfil.total_xp} XP para llegar a Oro",
             "xp_objetivo": objetivo,
             "progreso": min(progreso, 100),
             "completado": False
         }
 
     return {
-        "mensaje": "¡Eres un maestro de las finanzas!",
+        "mensaje": "¡Eres una leyenda del autocontrol!",
         "xp_objetivo": None,
         "progreso": 100.0,
         "completado": True

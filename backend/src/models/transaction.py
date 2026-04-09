@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Integer, Numeric, ForeignKey, DateTime
+from sqlalchemy import Column, String, Integer, Numeric, ForeignKey, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from src.models.base import Base, AuditMixin
@@ -20,6 +20,8 @@ class SubCategoria(Base, AuditMixin):
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=False)
     nombre = Column(String, nullable=False) # Taxonomía Micro
+    is_risky = Column(Boolean, default=False) # Nuevo: Para detectar ludopatía/impulsividad
+    risk_level = Column(String, nullable=True) # low, medium, high
 
     # --- Relaciones Bidireccionales ---
     categoria = relationship("Categoria", back_populates="sub_categorias")

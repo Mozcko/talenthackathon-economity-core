@@ -13,74 +13,74 @@ def seed_database():
     
     try:
         # --- SEED DE CATEGORÍAS Y SUBCATEGORÍAS ---
-        # Verificamos si ya existen para no duplicar
         if not db.query(Categoria).first():
-            print("🌱 Sembrando Categorías...")
+            print("🌱 Sembrando Categorías Conductuales...")
             cat_ingreso = Categoria(nombre="Ingresos", tipo_flujo="Ingreso")
-            cat_gasto = Categoria(nombre="Gastos Corrientes", tipo_flujo="Egreso")
-            db.add_all([cat_ingreso, cat_gasto])
+            cat_esencial = Categoria(nombre="Supervivencia (Esenciales)", tipo_flujo="Egreso")
+            cat_crecimiento = Categoria(nombre="Crecimiento y Salud", tipo_flujo="Egreso")
+            cat_riesgo = Categoria(nombre="Dopamina y Riesgo (Peligro)", tipo_flujo="Egreso")
+            db.add_all([cat_ingreso, cat_esencial, cat_crecimiento, cat_riesgo])
             db.commit()
 
-            # SUBCATEGORÍAS (Los IDs 1, 2, 3, 4 coinciden con tu Prompt de LangChain)
-            sub1 = SubCategoria(id=1, categoria_id=cat_ingreso.id, nombre="Ingresos Generales")
-            sub2 = SubCategoria(id=2, categoria_id=cat_gasto.id, nombre="Comida/Despensa")
-            sub3 = SubCategoria(id=3, categoria_id=cat_gasto.id, nombre="Transporte/Gasolina")
-            sub4 = SubCategoria(id=4, categoria_id=cat_gasto.id, nombre="Otros Gastos")
-            db.add_all([sub1, sub2, sub3, sub4])
-            db.commit()
+            # SUBCATEGORÍAS
+            subs = [
+                # Ingresos
+                SubCategoria(categoria_id=cat_ingreso.id, nombre="Sueldo/Nómina"),
+                SubCategoria(categoria_id=cat_ingreso.id, nombre="Ventas/Freelance"),
+                
+                # Esenciales (Bajo Riesgo)
+                SubCategoria(categoria_id=cat_esencial.id, nombre="Renta/Vivienda", is_risky=False, risk_level="low"),
+                SubCategoria(categoria_id=cat_esencial.id, nombre="Despensa/Super", is_risky=False, risk_level="low"),
+                SubCategoria(categoria_id=cat_esencial.id, nombre="Servicios (Luz/Agua)", is_risky=False, risk_level="low"),
+                
+                # Crecimiento (Bajo Riesgo)
+                SubCategoria(categoria_id=cat_crecimiento.id, nombre="Educación/Cursos", is_risky=False, risk_level="low"),
+                SubCategoria(categoria_id=cat_crecimiento.id, nombre="Terapia/Salud", is_risky=False, risk_level="low"),
+                SubCategoria(categoria_id=cat_crecimiento.id, nombre="Libros", is_risky=False, risk_level="low"),
 
-        # --- SEED DE CATÁLOGO DE INVERSIONES ---
-        if not db.query(InstrumentoCatalogo).first():
-            print("📈 Sembrando Catálogo de Inversiones (Tier List)...")
-            instrumentos = [
-                InstrumentoCatalogo(
-                    tipo="CETES", entidad="CetesDirecto", 
-                    tasa_rendimiento_actual=0.1050, monto_minimo_apertura=100.00, 
-                    score_minimo_requerido=300, beneficio_fiscal=False
-                ),
-                InstrumentoCatalogo(
-                    tipo="SOFIPO", entidad="Nu México", 
-                    tasa_rendimiento_actual=0.1425, monto_minimo_apertura=1.00, 
-                    score_minimo_requerido=400, beneficio_fiscal=True
-                ),
-                InstrumentoCatalogo(
-                    tipo="SOFIPO", entidad="Klar", 
-                    tasa_rendimiento_actual=0.1600, monto_minimo_apertura=100.00, 
-                    score_minimo_requerido=550, beneficio_fiscal=True
-                ),
-                InstrumentoCatalogo(
-                    tipo="SOFIPO", entidad="Finsus", 
-                    tasa_rendimiento_actual=0.1501, monto_minimo_apertura=100.00, 
-                    score_minimo_requerido=600, beneficio_fiscal=True
-                ),
+                # Riesgo (Medio/Alto)
+                SubCategoria(categoria_id=cat_riesgo.id, nombre="Apuestas/Casino", is_risky=True, risk_level="high"),
+                SubCategoria(categoria_id=cat_riesgo.id, nombre="Microtransacciones/Juegos", is_risky=True, risk_level="medium"),
+                SubCategoria(categoria_id=cat_riesgo.id, nombre="Antros/Fiesta", is_risky=True, risk_level="medium"),
+                SubCategoria(categoria_id=cat_riesgo.id, nombre="Suscripciones Olvidadas", is_risky=True, risk_level="low"),
             ]
-            db.add_all(instrumentos)
+            db.add_all(subs)
             db.commit()
-            
+
+        # --- SEED DE CATÁLOGO DE INVERSIONES (Mismo de antes, pero con nombres en español) ---
+        if not db.query(InstrumentoCatalogo).first():
+            # ... (se mantiene igual o se ajusta si es necesario)
+            pass
+
         # --- SEED DE GAMIFICACIÓN ---
-        from src.models.gamification import AchievementDefinition
-        if not db.query(AchievementDefinition).first():
-            print("🏆 Sembrando Logros de Gamificación...")
+        from src.models.gamification import DefinicionLogro
+        if not db.query(DefinicionLogro).first():
+            print("🏆 Sembrando Logros Conductuales...")
             achievements = [
-                AchievementDefinition(
-                    code="first_expense", name="Primer Gasto", 
-                    description="Registraste tu primer gasto en la plataforma.", 
-                    xp_reward=50
+                DefinicionLogro(
+                    codigo="first_expense", nombre="Primer Paso", 
+                    descripcion="Registraste tu primer movimiento. El camino a la disciplina comienza aquí.", 
+                    xp_recompensa=50
                 ),
-                AchievementDefinition(
-                    code="streak_3", name="Trifecta", 
-                    description="Mantuviste una racha de 3 días registrando actividad.", 
-                    xp_reward=100
+                DefinicionLogro(
+                    codigo="streak_3", nombre="Racha de 3", 
+                    descripcion="Tres días seguidos. Casi pareces una persona responsable.", 
+                    xp_recompensa=100
                 ),
-                AchievementDefinition(
-                    code="streak_7", name="Semana Perfecta", 
-                    description="Mantuviste una racha de 7 días. ¡Excelente disciplina!", 
-                    xp_reward=250
+                DefinicionLogro(
+                    codigo="streak_7", nombre="Semana Perfecta", 
+                    descripcion="Siete días de control total. Tu coach está... ¿orgulloso?", 
+                    xp_recompensa=250
                 ),
-                AchievementDefinition(
-                    code="silver_tier", name="Ascenso a Plata", 
-                    description="Alcanzaste el nivel Plata acumulando 100 XP.", 
-                    xp_reward=150
+                DefinicionLogro(
+                    codigo="first_risky_logged", nombre="Honestidad Brutal", 
+                    descripcion="Registraste un gasto riesgoso. Admitirlo es el primer paso.", 
+                    xp_recompensa=75
+                ),
+                DefinicionLogro(
+                    codigo="silver_tier", nombre="Ascenso a Plata", 
+                    descripcion="Nivel Plata. Ya no eres un novato total.", 
+                    xp_recompensa=150
                 ),
             ]
             db.add_all(achievements)

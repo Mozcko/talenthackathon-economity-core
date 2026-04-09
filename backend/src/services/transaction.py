@@ -15,6 +15,7 @@ def create_transaccion(db: Session, transaccion: TransaccionCreate):
     # --- Hook de Gamificación ---
     try:
         from src.models.user import CuentaFinanciera
+        from src.models.transaction import SubCategoria
         from src.services import gamification as gamification_service
         
         # Obtenemos el usuario dueño de la cuenta
@@ -31,6 +32,15 @@ def create_transaccion(db: Session, transaccion: TransaccionCreate):
                 event_type="expense_created", 
                 reference_id=str(db_transaccion.id)
             )
+
+            # 3. Bono de Honestidad por gastos riesgosos
+            sub_cat = db.query(SubCategoria).filter(SubCategoria.id == db_transaccion.sub_categoria_id).first()
+            if sub_cat and sub_cat.is_risky:
+                gamification_service.award_honesty_xp(
+                    db, 
+                    user_id=cuenta.usuario_id, 
+                    transaction_id=str(db_transaccion.id)
+                )
     except Exception as e:
         # No queremos que un error en gamificación rompa el flujo principal de transacciones
         print(f"⚠️ Error en gamificación: {e}")

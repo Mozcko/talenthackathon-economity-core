@@ -11,16 +11,22 @@ client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
 class DatosExtraidos(BaseModel):
     """Esquema estricto que la IA debe respetar al responder"""
     monto: float = Field(description="El monto de la transacción (siempre positivo, ej: 150.50)")
-    descripcion: str = Field(description="Descripción clara y concisa (ej. 'Uber', 'Café', 'Nómina')")
+    descripcion: str = Field(description="Descripción clara y concisa (ej. 'Casino', 'Uber', 'Nómina')")
     es_ingreso: bool = Field(description="True si es un ingreso/ganancia, False si es un gasto/compra")
-    categoria_sugerida: str = Field(description="Nombre genérico de la categoría (ej. 'Alimentos', 'Transporte')")
+    categoria_sugerida: str = Field(description="Categoría conductual (ej. 'Apuestas/Casino', 'Antros/Fiesta', 'Despensa/Super', 'Sueldo/Nómina')")
+    es_riesgoso: bool = Field(description="True si el gasto es impulsivo o de riesgo (apuestas, juegos, fiesta, suscripciones)")
 
 async def extraer_datos_texto_async(texto: str) -> dict:
-    """Analiza texto plano para extraer la transacción estructurada."""
+    """Analiza texto plano para extraer la transacción estructurada bajo el lente conductual."""
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, api_key=settings.openai_api_key)
     estructurador = llm.with_structured_output(DatosExtraidos)
     
-    prompt = f"Extrae los datos financieros de la siguiente oración o dictado:\n{texto}"
+    prompt = (
+        "Analiza el siguiente texto y extrae la transacción financiera.\n"
+        "REGLA CONDUCTUAL: Clasifica como 'es_riesgoso=True' cualquier gasto en apuestas, casinos, "
+        "compras impulsivas en juegos (skins, gemas), alcohol, antros o gastos innecesarios.\n"
+        f"Texto: {texto}"
+    )
     resultado = await estructurador.ainvoke(prompt)
     
     datos = resultado.model_dump()
