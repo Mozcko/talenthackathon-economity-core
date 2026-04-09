@@ -6,7 +6,7 @@ from decimal import Decimal
 # Importamos los esquemas que ya teníamos para reutilizarlos
 from src.schemas.goal import MetaFinancieraResponse
 from src.schemas.investment import InstrumentoCatalogoResponse
-
+ 
 class DashboardSummaryResponse(BaseModel):
     saldo_total: Decimal
     flujo_caja_mensual: Decimal

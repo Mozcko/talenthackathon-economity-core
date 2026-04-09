@@ -4,7 +4,7 @@ FROM docker.io/python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /app
+WORKDIR /app 
 
 # Dependencias del sistema para compilar psycopg2 (PostgreSQL) y ChromaDB
 RUN apt-get update && apt-get install -y \

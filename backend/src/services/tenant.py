@@ -12,7 +12,7 @@ def create_tenant(db: Session, tenant: TenantCreate) -> Tenant:
     db.commit()
     db.refresh(db_tenant)
     return db_tenant
-
+ 
 def get_tenant(db: Session, tenant_id: UUID) -> Tenant:
     """Busca una organización por su ID."""
     return db.query(Tenant).filter(Tenant.id == tenant_id).first()

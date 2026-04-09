@@ -13,7 +13,7 @@ def create_usuario(db: Session, user: UsuarioCreate):
     db.commit()
     db.refresh(db_user) # Actualizamos la variable con los datos generados (ej. created_at)
     return db_user
-
+ 
 def get_usuario(db: Session, user_id: str):
     """Obtiene un usuario por su ID."""
     return db.query(Usuario).filter(Usuario.id == user_id).first()

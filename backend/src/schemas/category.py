@@ -14,4 +14,4 @@ class CategoriaResponse(BaseModel):
     tipo_flujo: str
     subcategorias: List[SubCategoriaResponse] = []
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True) 

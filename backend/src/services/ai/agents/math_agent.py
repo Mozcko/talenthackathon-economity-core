@@ -3,7 +3,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 from src.core.config import settings
-
+ 
 @tool
 def calcular_interes_compuesto(capital_inicial: float, aportacion_mensual: float, tasa_anual: float, anos: int) -> dict:
     """

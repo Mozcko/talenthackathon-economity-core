@@ -10,7 +10,7 @@ from src.schemas.tenant import TenantCreate, TenantResponse
 from src.services import tenant as tenant_service
 
 router = APIRouter(prefix="/organizaciones", tags=["Organizaciones (Tenants)"])
-
+ 
 @router.post("/", response_model=TenantResponse)
 def registrar_organizacion(
     tenant: TenantCreate,

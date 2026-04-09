@@ -33,7 +33,7 @@ services:
     build: .
     container_name: economity-api
     ports:
-      - "8000:8000"
+      - "8000:8000" 
     volumes:
       - .:/app:z
     env_file:

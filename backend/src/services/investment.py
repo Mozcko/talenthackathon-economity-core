@@ -7,7 +7,7 @@ from src.models.transaction import Transaccion
 from src.models.investment import InstrumentoCatalogo, PortafolioInversion
 from src.models.user import Usuario
 from src.schemas.investment import PortafolioInversionCreate
-
+ 
 # --- TIER LIST (Recomendaciones) ---
 
 def generar_tierlist_dinamica(db: Session, user_id: str, tenant_id: UUID):

@@ -6,7 +6,7 @@ from src.models.base import Base, AuditMixin
 
 class InstrumentoCatalogo(Base, AuditMixin):
     __tablename__ = "instrumentos_catalogo"
-
+ 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     tipo = Column(String, nullable=False) # SOFIPO, PPR, CETES
     entidad = Column(String, nullable=False) # Finsus, Nu, etc.

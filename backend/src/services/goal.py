@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from src.models.goal import MetaFinanciera
 from src.schemas.goal import MetaFinancieraCreate
-
+ 
 def create_meta(db: Session, meta: MetaFinancieraCreate):
     """Crea una nueva meta financiera en la base de datos."""
     db_meta = MetaFinanciera(**meta.model_dump())

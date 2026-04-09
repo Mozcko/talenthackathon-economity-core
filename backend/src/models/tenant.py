@@ -10,7 +10,7 @@ class Tenant(Base, AuditMixin):
     Coincide con el Organization ID si usas Clerk B2B, o aisla cuentas individuales.
     """
     __tablename__ = "tenants"
-
+ 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     nombre = Column(String, nullable=True) # Opcional: Nombre de la organización/entorno
 
