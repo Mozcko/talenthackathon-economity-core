@@ -19,7 +19,7 @@ interface Logro {
   definicion: Record<string, any>;
 }
 
-interface Hito {
+interface Objetivo {
   mensaje: string;
   xp_objetivo: number | null;
   progreso: number;
@@ -29,7 +29,7 @@ interface Hito {
 export default function GamificationProfile() {
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [logros, setLogros] = useState<Logro[]>([]);
-  const [hito, setHito] = useState<Hito | null>(null);
+  const [Objetivo, setObjetivo] = useState<Objetivo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,11 +37,11 @@ export default function GamificationProfile() {
     Promise.allSettled([
       apiFetch<Perfil>('/gamification/profile'),
       apiFetch<Logro[]>('/gamification/achievements'),
-      apiFetch<Hito>('/gamification/next-milestone'),
+      apiFetch<Objetivo>('/gamification/next-milestone'),
     ]).then(([p, a, h]) => {
       if (p.status === 'fulfilled') setPerfil(p.value);
       if (a.status === 'fulfilled') setLogros(a.value);
-      if (h.status === 'fulfilled') setHito(h.value);
+      if (h.status === 'fulfilled') setObjetivo(h.value);
       if (p.status === 'rejected' && a.status === 'rejected' && h.status === 'rejected') {
         setError(p.reason?.message ?? 'Error cargando perfil');
       }
@@ -130,22 +130,22 @@ export default function GamificationProfile() {
       </div>
 
       {/* Next Milestone */}
-      {hito && (
+      {Objetivo && (
         <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-6 space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{hito.completado ? '✅' : '🎯'}</span>
-            <h2 className="font-bold text-on-surface text-lg">Próximo Hito</h2>
+            <span className="text-xl">{Objetivo.completado ? '✅' : '🎯'}</span>
+            <h2 className="font-bold text-on-surface text-lg">Próximo Objetivo</h2>
           </div>
-          <p className="text-on-surface/70">{hito.mensaje}</p>
-          {!hito.completado && (
+          <p className="text-on-surface/70">{Objetivo.mensaje}</p>
+          {!Objetivo.completado && (
             <>
               <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
                 <div
                   className="bg-secondary h-full rounded-full transition-all duration-700"
-                  style={{ width: `${Math.min(100, hito.progreso * 100)}%` }}
+                  style={{ width: `${Math.min(100, Objetivo.progreso * 100)}%` }}
                 />
               </div>
-              <p className="text-xs text-on-surface/40">{(hito.progreso * 100).toFixed(0)}% completado{hito.xp_objetivo ? ` · ${hito.xp_objetivo} XP objetivo` : ''}</p>
+              <p className="text-xs text-on-surface/40">{(Objetivo.progreso * 100).toFixed(0)}% completado{Objetivo.xp_objetivo ? ` · ${Objetivo.xp_objetivo} XP objetivo` : ''}</p>
             </>
           )}
         </div>

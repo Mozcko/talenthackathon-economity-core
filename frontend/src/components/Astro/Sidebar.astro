@@ -4,6 +4,7 @@ import portafolioIcon from "../../assets/portafolioIcon.png";
 import insightIcon from "../../assets/insightsIcon.png";
 import transactionsIcon from "../../assets/transactionIcon.png";
 import communityIcon from "../../assets/community.png";
+import shellIcon from "../../assets/shell.svg";
 
 
 interface Props {
@@ -13,14 +14,14 @@ interface Props {
 const { currentTab = 'dashboard' } = Astro.props;
 
 const navItems = [
-    { name: 'Dashboard', id: 'dashboard', icon: dashboardIcon },
-    { name: 'Vault', id: 'vault', icon: portafolioIcon },
+    { name: 'Rudy', id: 'dashboard', icon: shellIcon },
+    { name: 'Bóveda', id: 'vault', icon: portafolioIcon },
     // { name: 'Insights', id: 'insights', icon: insightIcon },
-    { name: 'Transactions', id: 'transactions', icon: transactionsIcon },
-    { name: 'Metas', id: 'metas', icon: insightIcon },
+    { name: 'Transacciones', id: 'transactions', icon: transactionsIcon },
+    { name: 'Metas', id: 'metas', icon: dashboardIcon },
     // { name: 'Logros', id: 'logros', icon: insightIcon },
     { name: 'Chat', id: 'chat', icon: insightIcon },
-    { name: 'Community', id: 'community', icon: communityIcon },
+    { name: 'Comunidad', id: 'community', icon: communityIcon },
 ];
 ---
 <aside class="w-50 h-full bg-surface-container-lowest border-r border-outline-variant flex flex-col py-10">
@@ -34,7 +35,7 @@ const navItems = [
                         isActive ? "text-secondary bg-momentum-glow" : "text-on-surface/50 hover:text-secondary hover:bg-momentum-glow"
                     }`}
                 >
-                    <img src={item.icon.src} alt={item.name} class={`w-5 h-5 transition-opacity duration-300 ${isActive ? "opacity-100" : "opacity-50 group-hover:opacity-100"}`} />
+                    <img src={item.icon?.src} alt={item.name} class={`w-5 h-5 transition-opacity duration-300 ${isActive ? "opacity-100" : "opacity-50 group-hover:opacity-100"}`} />
                     
                     <span>{item.name}</span>
                     

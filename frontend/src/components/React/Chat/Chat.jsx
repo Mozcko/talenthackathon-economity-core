@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ClerkProvider, useAuth } from "@clerk/react";
+import microphoneIcon from "../../../assets/microphone.svg";
 
 function ChatContent() {
   const { getToken, isLoaded, isSignedIn } = useAuth();
@@ -63,7 +64,7 @@ function ChatContent() {
         console.log(`Disconnected. Code: ${event.code}, Reason: ${event.reason}`);
         wsRef.current = null;
         if (event.code === 1006) {
-          setStatus("Server error (500). Connection dropped.");
+          setStatus("Error del servidor (500). Conexión perdida.");
         }
       };
 
@@ -87,7 +88,7 @@ function ChatContent() {
 
     if (wsRef.current.readyState !== WebSocket.OPEN) {
       console.warn("Cannot send message: WebSocket state is", wsRef.current.readyState);
-      setStatus("Connection lost. Reconnecting...");
+      setStatus("Conexión perdida. Reconectando...");
       return;
     }
 
@@ -176,7 +177,7 @@ function ChatContent() {
         <button
           onClick={handleAttachFileClick}
           className="p-2 rounded-full hover:bg-surface-container-low transition-colors"
-          aria-label="Attach file"
+          aria-label="Adjuntar archivo"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-500 cursor-pointer hover:text-gray-700 transition-colors">
             <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94a3 3 0 114.243 4.243l-10.53 10.53a1.5 1.5 0 01-2.121-2.121l9.645-9.645" />
@@ -188,24 +189,22 @@ function ChatContent() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown} // Add onKeyDown handler
-          placeholder="Ask your advisor!"
+          placeholder="¡Pregunta a tu asesor!"
         />
 
         {/* Microphone icon */}
         <button
           className="p-2 rounded-full hover:bg-surface-container-low transition-colors"
-          aria-label="Voice input"
+          aria-label="Entrada de voz"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-500 cursor-pointer hover:text-red-500 transition-colors">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 6a6 6 0 01-6-6v-1.5m6 6v3.75m-3.75 0h7.5M12 10.5a3 3 0 11-6 0v-1.5a3 3 0 016 0v1.5z" />
-          </svg>
+          <img src={microphoneIcon.src} alt="Entrada de voz" className="w-6 h-6 opacity-50 hover:opacity-100 transition-opacity" />
         </button>
 
         <button
           onClick={sendMessage}
           className="btn-primary"
         >
-          Send
+          Enviar
         </button>
       </div>
     </div>
