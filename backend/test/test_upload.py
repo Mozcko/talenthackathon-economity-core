@@ -33,9 +33,8 @@ def test_procesar_texto(mock_extraer):
     
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "success"
-    assert data["data"]["monto"] == 150.0
-    assert data["data"]["descripcion"] == "Café de Starbucks"
+    assert data["monto"] == 150.0
+    assert data["descripcion"] == "Café de Starbucks"
     mock_extraer.assert_called_once_with("Pagué 150 por un café")
 
 @patch("src.api.routers.upload.extraction_agent.extraer_datos_audio_async", new_callable=AsyncMock)
@@ -52,8 +51,7 @@ def test_procesar_audio(mock_extraer):
     
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "success"
-    assert data["data"]["categoria_sugerida"] == "Alimentos"
+    assert data["categoria_sugerida"] == "Alimentos"
     # Verificamos que nuestro agente fue llamado
     mock_extraer.assert_called_once()
 
@@ -71,6 +69,5 @@ def test_procesar_imagen(mock_extraer):
     
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "success"
-    assert data["data"]["es_ingreso"] is False
+    assert data["es_ingreso"] is False
     mock_extraer.assert_called_once()

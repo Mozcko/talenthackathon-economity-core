@@ -20,7 +20,7 @@ async def procesar_texto(
     """Recibe texto, usa el Agente IA para extraer monto y descripción, y lo devuelve al frontend."""
     try:
         datos = await extraction_agent.extraer_datos_texto_async(payload.texto)
-        return {"status": "success", "data": datos}
+        return datos
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -36,7 +36,7 @@ async def procesar_audio(
         
     try:
         datos = await extraction_agent.extraer_datos_audio_async(temp_path)
-        return {"status": "success", "data": datos}
+        return datos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error procesando audio: {str(e)}")
     finally:
@@ -55,7 +55,7 @@ async def procesar_imagen(
         
     try:
         datos = await extraction_agent.extraer_datos_imagen_async(temp_path)
-        return {"status": "success", "data": datos}
+        return datos
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error procesando imagen: {str(e)}")
     finally:

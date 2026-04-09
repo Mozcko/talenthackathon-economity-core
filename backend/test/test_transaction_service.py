@@ -36,7 +36,8 @@ class TestCreateTransaccion:
         schema = self._make_schema()
         cuenta = MagicMock()
         cuenta.usuario_id = "user_123"
-        mock_db.query.return_value.filter.return_value.first.return_value = cuenta
+        # First .first() → CuentaFinanciera; second .first() → SubCategoria (None = not risky)
+        mock_db.query.return_value.filter.return_value.first.side_effect = [cuenta, None]
 
         with patch("src.services.transaction.Transaccion") as MockTx, \
              patch("src.services.gamification.update_streak") as mock_streak, \

@@ -8,7 +8,7 @@ from uuid import uuid4
 # 1. Configuración: Usa la misma clave secreta que tienes en tu archivo .env
 # Si no la tienes a mano, puedes forzarla temporalmente o importarla de tus settings
 from src.core.config import settings
-SECRET_KEY = settings.jwt_secret_key
+SECRET_KEY = settings.jwt_secret_key or "test-secret-key"
 
 # 2. Generamos un token simulado simulando el formato de Clerk
 # Usamos un UUID válido porque tu backend (chat.py) lo intenta convertir a UUID para buscar el dashboard

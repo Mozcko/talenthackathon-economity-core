@@ -29,7 +29,8 @@ class TestGetProfile:
         mock_db.add.assert_not_called()
 
     def test_crea_perfil_si_no_existe(self, mock_db):
-        mock_db.query.return_value.filter.return_value.first.return_value = None
+        # First .first() → no profile; second .first() → user exists
+        mock_db.query.return_value.filter.return_value.first.side_effect = [None, MagicMock()]
 
         with patch("src.services.gamification.PerfilGamificacion") as MockPerfil:
             nuevo_perfil = MagicMock()
@@ -250,7 +251,7 @@ class TestGetNextMilestone:
 
         assert resultado["xp_objetivo"] == 100
         assert resultado["completado"] is False
-        assert "Silver" in resultado["mensaje"]
+        assert "Plata" in resultado["mensaje"]
         assert 0 < resultado["progreso"] <= 100
 
     def test_retorna_hito_gold_si_xp_entre_100_y_300(self, mock_db, perfil_base):
@@ -261,7 +262,7 @@ class TestGetNextMilestone:
 
         assert resultado["xp_objetivo"] == 300
         assert resultado["completado"] is False
-        assert "Gold" in resultado["mensaje"]
+        assert "Oro" in resultado["mensaje"]
 
     def test_retorna_completado_si_xp_mayor_o_igual_a_300(self, mock_db, perfil_base):
         perfil_base.total_xp = 350

@@ -1,4 +1,5 @@
 import base64
+import mimetypes
 import openai
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
@@ -55,7 +56,7 @@ async def extraer_datos_imagen_async(file_path: str) -> dict:
     mensaje = HumanMessage(
         content=[
             {"type": "text", "text": "Analiza este ticket, recibo o factura. Extrae el monto TOTAL pagado, una descripción breve de la compra y sugiere una categoría."},
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+            {"type": "image_url", "image_url": {"url": f"data:{mimetypes.guess_type(file_path)[0] or 'image/jpeg'};base64,{base64_image}"}}
         ]
     )
     resultado = await estructurador.ainvoke([mensaje])
