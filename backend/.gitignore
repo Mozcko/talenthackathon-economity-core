@@ -21,4 +21,4 @@ ENV/
 # --- Análisis Estático y Testing ---
 .pytest_cache/
 .coverage
-.ruff_cache/
+.ruff_cache/ 

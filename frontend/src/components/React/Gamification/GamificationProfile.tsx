@@ -26,15 +26,38 @@ interface Objetivo {
   completado: boolean;
 }
 
+// Mock example for the Perfil interface. 
+// You can pass this to useState<Perfil | null>(MOCK_PERFIL) to test the UI.
+const MOCK_PERFIL: Perfil = {
+  usuario_id: 'user_2N0xV8...',
+  total_xp: 1250,
+  nivel_actual: 'Plata',
+  racha_actual: 5,
+  racha_maxima: 12,
+  fecha_ultima_actividad: new Date().toISOString(),
+  siguiente_nivel: 'Oro',
+  xp_para_siguiente_nivel: 250,
+  porcentaje_progreso: 75,
+};
+
+// Mock example for the Objetivo interface to ensure a complete UI preview.
+const MOCK_OBJETIVO: Objetivo = {
+  mensaje: '¡Sigue así! Estás a punto de alcanzar tu meta de ahorro mensual.',
+  xp_objetivo: 500,
+  progreso: 0.85,
+  completado: false,
+};
+
 export default function GamificationProfile() {
-  const [perfil, setPerfil] = useState<Perfil | null>(null);
+  const [perfil, setPerfil] = useState<Perfil | null>(MOCK_PERFIL);
   const [logros, setLogros] = useState<Logro[]>([]);
-  const [Objetivo, setObjetivo] = useState<Objetivo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [Objetivo, setObjetivo] = useState<Objetivo | null>(MOCK_OBJETIVO);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.allSettled([
+    // API logic is preserved but commented out to prioritize mock data as requested.
+    /* Promise.allSettled([
       apiFetch<Perfil>('/gamification/profile'),
       apiFetch<Logro[]>('/gamification/achievements'),
       apiFetch<Objetivo>('/gamification/next-milestone'),
@@ -46,6 +69,7 @@ export default function GamificationProfile() {
         setError(p.reason?.message ?? 'Error cargando perfil');
       }
     }).finally(() => setLoading(false));
+    */
   }, []);
 
   if (loading) {
