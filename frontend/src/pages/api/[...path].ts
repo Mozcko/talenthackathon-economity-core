@@ -1,8 +1,20 @@
 import type { APIRoute } from 'astro';
 
-const BACKEND = (import.meta.env.PUBLIC_API_URL as string).replace(/\/$/, '');
-
 export const ALL: APIRoute = async ({ request, params }) => {
+  // Read at request time (runtime) so Railway env vars are picked up
+  const rawUrl =
+    (import.meta.env.PUBLIC_API_URL as string | undefined) ||
+    (process.env.PUBLIC_API_URL as string | undefined) ||
+    '';
+
+  if (!rawUrl) {
+    return new Response(
+      JSON.stringify({ detail: 'Backend URL not configured — set PUBLIC_API_URL in Railway' }),
+      { status: 503, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const BACKEND = rawUrl.replace(/\/$/, '');
   const path = params.path ?? '';
   const search = new URL(request.url).search;
   const target = `${BACKEND}/${path}${search}`;
@@ -16,11 +28,18 @@ export const ALL: APIRoute = async ({ request, params }) => {
     init.body = await request.arrayBuffer();
   }
 
-  const upstream = await fetch(target, init);
-
-  return new Response(upstream.body, {
-    status: upstream.status,
-    statusText: upstream.statusText,
-    headers: upstream.headers,
-  });
+  try {
+    const upstream = await fetch(target, init);
+    return new Response(upstream.body, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers: upstream.headers,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return new Response(
+      JSON.stringify({ detail: `Proxy fetch failed: ${msg} (target: ${target})` }),
+      { status: 502, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 };
