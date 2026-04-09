@@ -136,38 +136,6 @@ export default function GamificationProfile() {
           )}
         </div>
       )}
-
-      {/* Achievements */}
-      <div>
-        <h2 className="font-bold text-on-surface text-xl mb-4">Logros Desbloqueados ({logros.length})</h2>
-        {logros.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-on-surface/30">
-            <span className="text-5xl mb-3">🏆</span>
-            <p className="italic">Completa acciones para desbloquear logros</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {logros.map((logro) => (
-              <div key={logro.codigo_logro} className="flex items-start gap-4 p-4 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest hover:shadow-sm transition-shadow">
-                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-xl shrink-0">
-                  {logro.definicion?.icono ?? '🏅'}
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-on-surface text-sm truncate">
-                    {logro.definicion?.nombre ?? logro.codigo_logro}
-                  </p>
-                  {logro.definicion?.descripcion && (
-                    <p className="text-xs text-on-surface/50 mt-0.5 line-clamp-2">{logro.definicion.descripcion}</p>
-                  )}
-                  <p className="text-xs text-on-surface/30 mt-1">
-                    {new Date(logro.desbloqueado_en).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

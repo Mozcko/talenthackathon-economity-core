@@ -9,7 +9,7 @@ import Chat from "../components/Astro/Chat.astro"
 import Vault from "../components/Astro/Vault.astro"
 import Community from "../components/Astro/Social.astro"
 import Metas from "../components/Astro/Metas.astro"
-import Logros from "../components/Astro/Logros.astro"
+
 
 // Get the current tab from the URL, defaulting to 'dashboard'
 const currentTab = Astro.url.searchParams.get('tab') || 'dashboard';
@@ -23,7 +23,6 @@ const currentTab = Astro.url.searchParams.get('tab') || 'dashboard';
 			{currentTab === 'insights' && <Insights />}
 			{currentTab === 'vault' && <Vault />}
 			{currentTab === 'metas' && <Metas />}
-			{currentTab === 'logros' && <Logros />}
 			{currentTab === 'chat' && <Chat />}
 			{currentTab === 'community' && <Community />}
 		</main>
