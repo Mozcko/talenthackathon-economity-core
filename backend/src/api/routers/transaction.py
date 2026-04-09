@@ -99,7 +99,7 @@ def registrar_transaccion_por_voz(
             cuenta_id=cuenta_id,
             sub_categoria_id=resolve_sub_categoria_id(db, datos_ia.categoria_sugerida, datos_ia.es_ingreso),
             tenant_id=tenant_uuid,
-            monto=datos_ia.monto,
+            monto=datos_ia.monto if datos_ia.es_ingreso else -datos_ia.monto,
             fecha_operacion=datetime.now(),
             descripcion=datos_ia.descripcion
         )
@@ -155,7 +155,7 @@ def registrar_transaccion_por_ticket(
             cuenta_id=cuenta_id,
             sub_categoria_id=resolve_sub_categoria_id(db, datos_ia.categoria_sugerida, datos_ia.es_ingreso),
             tenant_id=tenant_uuid,
-            monto=datos_ia.monto,
+            monto=datos_ia.monto if datos_ia.es_ingreso else -datos_ia.monto,
             fecha_operacion=datetime.now(),
             descripcion=datos_ia.descripcion
         )

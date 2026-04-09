@@ -4,6 +4,7 @@ import { apiFetch, getAppContext } from '../../../lib/api';
 type ProcessResult = {
   monto: number;
   descripcion: string;
+  es_ingreso: boolean;
   sub_categoria_id?: number;
 };
 
@@ -354,11 +355,11 @@ export default function DataCapture() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                      monto: result.monto,
+                      monto: result.es_ingreso ? result.monto : -result.monto,
                       fecha_operacion: new Date().toISOString(),
                       descripcion: result.descripcion,
                       cuenta_id: cuentaId,
-                      sub_categoria_id: result.sub_categoria_id ?? 1,
+                      sub_categoria_id: result.sub_categoria_id ?? null,
                       tenant_id: tenantId,
                     }),
                   });
