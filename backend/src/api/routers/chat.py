@@ -156,7 +156,7 @@ async def chat_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
                 
             elif categoria == "ANALISIS_DATOS":
                 await manager.send_status("analizando tu historial de gastos...", websocket)
-                respuesta = await analizar_datos_async(contenido, historial_enriquecido, user_id)
+                respuesta = await analizar_datos_async(contenido, historial_enriquecido, str(tenant_uuid))
                 
             elif categoria == "SOPORTE_GENERAL":
                 await manager.send_status("escribiendo...", websocket)

@@ -2,44 +2,48 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
+from sqlalchemy import cast, String, outerjoin
 
 from src.core.config import settings
 from src.core.database import SessionLocal
 from src.models.transaction import Transaccion, SubCategoria
- 
+
 @tool
 def obtener_resumen_transacciones(tenant_id: str) -> str:
     """
     Obtiene todo el historial de transacciones, ingresos y gastos del usuario.
-    Requiere el tenant_id (ID del usuario) para buscar en la base de datos.
+    Requiere el tenant_id (UUID del tenant) para buscar en la base de datos.
     """
     db = SessionLocal()
     try:
-        # Hacemos un JOIN para traer el nombre de la categoría junto con el gasto
-        resultados = db.query(Transaccion, SubCategoria).join(
-            SubCategoria, Transaccion.sub_categoria_id == SubCategoria.id
-        ).filter(
-            # Forzamos a string para evitar conflictos de tipo UUID en la query
-            cast(Transaccion.tenant_id, String) == tenant_id 
-        ).order_by(Transaccion.fecha_operacion.desc()).all()
-        
-        if not resultados:
-            return "No hay transacciones registradas."
-            
-        resumen = []
-        for t, s in resultados:
+        transacciones = (
+            db.query(Transaccion, SubCategoria)
+            .outerjoin(SubCategoria, Transaccion.sub_categoria_id == SubCategoria.id)
+            .filter(cast(Transaccion.tenant_id, String) == tenant_id)
+            .order_by(Transaccion.fecha_operacion.desc())
+            .all()
+        )
+
+        if not transacciones:
+            return "No hay transacciones registradas para este usuario."
+
+        total_ingresos = sum(float(t.monto) for t, _ in transacciones if float(t.monto) > 0)
+        total_gastos = sum(float(t.monto) for t, _ in transacciones if float(t.monto) < 0)
+
+        resumen = [f"RESUMEN: Ingresos totales=${total_ingresos:.2f} | Gastos totales=${abs(total_gastos):.2f} | Balance neto=${total_ingresos + total_gastos:.2f}"]
+        resumen.append("---")
+        for t, s in transacciones:
             fecha = t.fecha_operacion.strftime('%Y-%m-%d')
-            tipo = "Ingreso" if s.categoria_id == 1 else "Gasto"
-            resumen.append(f"[{fecha}] {tipo} - Categoría: {s.nombre} | Monto: ${t.monto} | Desc: {t.descripcion or 'N/A'}")
-            
+            monto = float(t.monto)
+            tipo = "Ingreso" if monto > 0 else "Gasto"
+            categoria = s.nombre if s else "Sin categoría"
+            resumen.append(f"[{fecha}] {tipo} - Categoría: {categoria} | Monto: ${abs(monto):.2f} | Desc: {t.descripcion or 'N/A'}")
+
         return "\n".join(resumen)
     except Exception as e:
         return f"Error al consultar base de datos: {str(e)}"
     finally:
         db.close()
-
-# Necesitamos importar cast y String para la query de arriba
-from sqlalchemy import cast, String
 
 async def analizar_datos_async(pregunta: str, historial: str, tenant_id: str) -> str:
     """Agente que analiza el historial de gastos del usuario."""

@@ -12,6 +12,16 @@ def create_transaccion(db: Session, transaccion: TransaccionCreate):
     db.commit()
     db.refresh(db_transaccion)
 
+    # --- Actualizar saldo de la cuenta ---
+    try:
+        from src.models.user import CuentaFinanciera
+        cuenta_upd = db.query(CuentaFinanciera).filter(CuentaFinanciera.id == db_transaccion.cuenta_id).first()
+        if cuenta_upd:
+            cuenta_upd.saldo_actual = (cuenta_upd.saldo_actual or 0) + db_transaccion.monto
+            db.commit()
+    except Exception as e:
+        print(f"⚠️ Error actualizando saldo: {e}")
+
     # --- Hook de Gamificación ---
     try:
         from src.models.user import CuentaFinanciera
