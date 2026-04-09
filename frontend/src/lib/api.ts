@@ -44,6 +44,7 @@ export async function getAppContext(): Promise<AppContext> {
 
     const data = await res.json();
     const cuenta = Array.isArray(data) ? data[0] : data;
+    if (!cuenta) throw new Error('No se encontró ninguna cuenta para este usuario');
 
     const ctx: AppContext = { userId, cuentaId: cuenta.id, tenantId: cuenta.tenant_id };
     sessionStorage.setItem('economity_ctx', JSON.stringify(ctx));

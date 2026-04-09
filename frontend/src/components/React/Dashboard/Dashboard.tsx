@@ -41,6 +41,14 @@ function Skeleton() {
   );
 }
 
+const DATOS_CERO: DashboardData = {
+  saldo_total: '0.00',
+  flujo_caja_mensual: '0.00',
+  score_resiliencia: 0,
+  meta_proxima: null,
+  mejor_oportunidad: null,
+};
+
 export default function Dashboard() {
   const [datos, setDatos] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,75 +57,72 @@ export default function Dashboard() {
   useEffect(() => {
     apiFetch<DashboardData>('/dashboard/summary')
       .then(setDatos)
-      .catch((err) => setError(err.message))
+      .catch((err) => {
+        console.error('[Dashboard] Error cargando resumen:', err.message);
+        setError(err.message);
+      })
       .finally(() => setCargando(false));
   }, []);
 
   if (cargando) return <Skeleton />;
 
-  if (error) {
-    return (
-      <div className="card-base h-full flex flex-col items-center justify-center text-center space-y-4 shadow-(--shadow-ambient) bg-primary-container text-white">
-        <svg className="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p className="font-medium">No pudimos cargar tus datos.</p>
-        <p className="text-sm text-white/60">{error}</p>
-      </div>
-    );
-  }
+  const displayDatos = datos ?? DATOS_CERO;
 
-  if (!datos) return null;
-
-  const progresoPct = datos.meta_proxima
-    ? Math.min(100, (parseFloat(datos.meta_proxima.progreso_actual) / parseFloat(datos.meta_proxima.monto_objetivo)) * 100)
+  const progresoPct = displayDatos.meta_proxima
+    ? Math.min(100, (parseFloat(displayDatos.meta_proxima.progreso_actual) / parseFloat(displayDatos.meta_proxima.monto_objetivo)) * 100)
     : 0;
 
   return (
-    <div className="card-base h-full flex flex-col justify-center space-y-8 shadow-(--shadow-ambient) bg-primary-container">
-      {/* Top: Assets & Score */}
-      <div className="flex justify-between items-center border-b border-white/10 pb-6">
-        <div>
-          <p className="text-sm font-medium text-white/60 mb-1">Patrimonio Total</p>
-          <div className="flex items-baseline gap-2">
-            <h2 className="text-display-lg font-bold text-white">${datos.saldo_total}</h2>
-            <span className="text-lg font-medium text-white/60">MXN</span>
+    <div className="h-full flex flex-col gap-2">
+      <div className="card-base flex-1 flex flex-col justify-center space-y-8 shadow-(--shadow-ambient) bg-primary-container">
+        {/* Top: Assets & Score */}
+        <div className="flex justify-between items-center border-b border-white/10 pb-6">
+          <div>
+            <p className="text-sm font-medium text-white/60 mb-1">Patrimonio Total</p>
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-display-lg font-bold text-white">${displayDatos.saldo_total}</h2>
+              <span className="text-lg font-medium text-white/60">MXN</span>
+            </div>
+          </div>
+          <div className="text-right flex flex-col items-end">
+            <p className="text-sm font-medium text-white/60 mb-2">Score Resiliencia</p>
+            <div className="ai-chip text-lg px-4 py-2">{displayDatos.score_resiliencia}</div>
           </div>
         </div>
-        <div className="text-right flex flex-col items-end">
-          <p className="text-sm font-medium text-white/60 mb-2">Score Resiliencia</p>
-          <div className="ai-chip text-lg px-4 py-2">{datos.score_resiliencia}</div>
+
+        {/* Bottom: Cashflow & Next Goal */}
+        <div className="grid grid-cols-2 gap-6 pt-2">
+          <div>
+            <p className="text-sm font-medium text-white/60 mb-1">Flujo Libre Mensual</p>
+            <p className="text-3xl font-bold text-on-tertiary-fixed">${displayDatos.flujo_caja_mensual}</p>
+          </div>
+
+          <div>
+            {displayDatos.meta_proxima ? (
+              <>
+                <p className="text-sm font-medium text-white/60 mb-1">Meta Próxima</p>
+                <p className="text-base font-bold text-white truncate">{displayDatos.meta_proxima.nombre}</p>
+                <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden mt-2">
+                  <div
+                    className="bg-secondary h-full rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${progresoPct}%` }}
+                  />
+                </div>
+                <p className="text-xs text-white/50 mt-1">{progresoPct.toFixed(0)}% completado</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-white/60 mb-1">Meta Próxima</p>
+                <p className="text-sm text-white/40 italic">Sin metas activas</p>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Bottom: Cashflow & Next Goal */}
-      <div className="grid grid-cols-2 gap-6 pt-2">
-        <div>
-          <p className="text-sm font-medium text-white/60 mb-1">Flujo Libre Mensual</p>
-          <p className="text-3xl font-bold text-on-tertiary-fixed">${datos.flujo_caja_mensual}</p>
-        </div>
-
-        <div>
-          {datos.meta_proxima ? (
-            <>
-              <p className="text-sm font-medium text-white/60 mb-1">Meta Próxima</p>
-              <p className="text-base font-bold text-white truncate">{datos.meta_proxima.nombre}</p>
-              <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden mt-2">
-                <div
-                  className="bg-secondary h-full rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: `${progresoPct}%` }}
-                />
-              </div>
-              <p className="text-xs text-white/50 mt-1">{progresoPct.toFixed(0)}% completado</p>
-            </>
-          ) : (
-            <>
-              <p className="text-sm font-medium text-white/60 mb-1">Meta Próxima</p>
-              <p className="text-sm text-white/40 italic">Sin metas activas</p>
-            </>
-          )}
-        </div>
-      </div>
+      {error && (
+        <p className="text-xs text-red-400/70 px-1">Error al cargar datos: {error}</p>
+      )}
     </div>
   );
 }
