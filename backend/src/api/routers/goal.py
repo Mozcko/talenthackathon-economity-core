@@ -7,10 +7,19 @@ from decimal import Decimal
 
 from src.core.database import get_db
 from src.core.security import get_current_user_token
+from src.models.user import Usuario
 from src.schemas.goal import MetaFinancieraCreate, MetaFinancieraResponse
 from src.services import goal as goal_service
 
 router = APIRouter(prefix="/metas", tags=["Metas Financieras"])
+
+
+def _get_usuario_or_404(db: Session, clerk_user_id: str) -> Usuario:
+    usuario = db.query(Usuario).filter(Usuario.id == clerk_user_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return usuario
+
 
 @router.post("/", response_model=MetaFinancieraResponse)
 def crear_nueva_meta(
@@ -19,15 +28,16 @@ def crear_nueva_meta(
     token_payload: Dict[str, Any] = Depends(get_current_user_token)
 ):
     """Crea una meta asociada al usuario autenticado (Zero-Trust)."""
-    tenant_id = token_payload.get("sub")
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Token no contiene 'sub' (tenant_id)")
-    
-    # Inyectamos de forma segura el ID del usuario extraído del Token
-    meta.tenant_id = UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id
-    meta.usuario_id = str(tenant_id)
-    
+    clerk_user_id = token_payload.get("sub")
+    if not clerk_user_id:
+        raise HTTPException(status_code=400, detail="Token no contiene 'sub'")
+
+    usuario = _get_usuario_or_404(db, clerk_user_id)
+    meta.tenant_id = usuario.tenant_id
+    meta.usuario_id = clerk_user_id
+
     return goal_service.create_meta(db=db, meta=meta)
+
 
 @router.get("/", response_model=List[MetaFinancieraResponse])
 def listar_mis_metas(
@@ -35,9 +45,13 @@ def listar_mis_metas(
     token_payload: Dict[str, Any] = Depends(get_current_user_token)
 ):
     """Retorna todas las metas del usuario."""
-    tenant_id = token_payload.get("sub")
-    _tenant_uuid = UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id
-    return goal_service.get_metas_by_usuario(db=db, tenant_id=_tenant_uuid)
+    clerk_user_id = token_payload.get("sub")
+    if not clerk_user_id:
+        raise HTTPException(status_code=400, detail="Token no contiene 'sub'")
+
+    usuario = _get_usuario_or_404(db, clerk_user_id)
+    return goal_service.get_metas_by_usuario(db=db, tenant_id=usuario.tenant_id)
+
 
 @router.patch("/{meta_id}/progreso", response_model=MetaFinancieraResponse)
 def agregar_progreso_meta(
@@ -47,14 +61,17 @@ def agregar_progreso_meta(
     token_payload: Dict[str, Any] = Depends(get_current_user_token)
 ):
     """Agrega fondos a una meta específica."""
-    tenant_id = token_payload.get("sub")
-    _tenant_uuid = UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id
-    
-    meta_actualizada = goal_service.add_progreso_meta(db, meta_id, monto_a_sumar, _tenant_uuid)
+    clerk_user_id = token_payload.get("sub")
+    if not clerk_user_id:
+        raise HTTPException(status_code=400, detail="Token no contiene 'sub'")
+
+    usuario = _get_usuario_or_404(db, clerk_user_id)
+    meta_actualizada = goal_service.add_progreso_meta(db, meta_id, monto_a_sumar, usuario.tenant_id)
     if not meta_actualizada:
         raise HTTPException(status_code=404, detail="La meta no existe o no te pertenece")
-        
+
     return meta_actualizada
+
 
 @router.delete("/{meta_id}")
 def borrar_meta(
@@ -63,11 +80,13 @@ def borrar_meta(
     token_payload: Dict[str, Any] = Depends(get_current_user_token)
 ):
     """Elimina una meta del perfil del usuario."""
-    tenant_id = token_payload.get("sub")
-    _tenant_uuid = UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id
-    
-    eliminado = goal_service.delete_meta(db, meta_id, _tenant_uuid)
+    clerk_user_id = token_payload.get("sub")
+    if not clerk_user_id:
+        raise HTTPException(status_code=400, detail="Token no contiene 'sub'")
+
+    usuario = _get_usuario_or_404(db, clerk_user_id)
+    eliminado = goal_service.delete_meta(db, meta_id, usuario.tenant_id)
     if not eliminado:
         raise HTTPException(status_code=404, detail="La meta no existe o no te pertenece")
-        
+
     return {"status": "success", "detail": "Meta eliminada correctamente"}
