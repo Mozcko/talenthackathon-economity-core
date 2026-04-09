@@ -4,10 +4,10 @@ import { useMemo, useState, useEffect } from 'react';
 interface ChartDataProps {
   data: {
     id: number;
-    entidad: string;
-    tipo: string;
+    comercio: string;
+    categoria: string;
     monto: number;
-    tasa: number;
+    fecha: string;
   }[];
 }
 
@@ -38,12 +38,12 @@ export default function AssetDistributionChart({ data }: ChartDataProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Agrupar los montos por "tipo" (Tomamos la primera parte antes del guion si lo hay)
+  // Agrupar los montos por "categoria"
   const chartData = useMemo(() => {
     const grouped = data.reduce((acc, curr) => {
-      const type = curr.tipo.split('-')[0].trim();
-      if (!acc[type]) acc[type] = 0;
-      acc[type] += curr.monto;
+      const cat = curr.categoria.split('-')[0].trim();
+      if (!acc[cat]) acc[cat] = 0;
+      acc[cat] += curr.monto;
       return acc;
     }, {} as Record<string, number>);
 

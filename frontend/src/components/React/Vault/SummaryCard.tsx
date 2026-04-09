@@ -7,15 +7,15 @@ interface SummaryCardProps {
 
 export default function SummaryCard({ title, value, subtitle, trend }: SummaryCardProps) {
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+    <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/20 flex flex-col justify-between hover:shadow-md transition-shadow">
       <div>
-        <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">{title}</p>
-        <h3 className="text-4xl font-extrabold text-gray-800 mt-2">{value}</h3>
+        <p className="text-xs font-bold text-on-surface/50 uppercase tracking-widest">{title}</p>
+        <h3 className="text-4xl font-black text-on-surface mt-2">{value}</h3>
       </div>
       <div className="mt-6 flex items-center justify-between">
-        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+        {subtitle && <p className="text-sm text-on-surface/40 font-medium">{subtitle}</p>}
         {trend && (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-secondary/10 text-secondary uppercase tracking-tight">
             {trend}
           </span>
         )}
