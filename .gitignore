@@ -21,3 +21,4 @@ frontend/.next/
 .DS_Store
 Thumbs.db
 backend/.gemini/
+/.claude

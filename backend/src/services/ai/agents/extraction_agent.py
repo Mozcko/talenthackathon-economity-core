@@ -1,5 +1,6 @@
 import base64
 import mimetypes
+import re
 import openai
 from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
@@ -8,6 +9,26 @@ from src.core.config import settings
 
 # Usamos el cliente asíncrono nativo de OpenAI para Whisper
 client = openai.AsyncOpenAI(api_key=settings.openai_api_key)
+
+# Palabras clave que indican inequívocamente gasto o ingreso.
+# Se aplican DESPUÉS de que el LLM extrae los demás campos, anulando su clasificación.
+_KEYWORDS_GASTO = re.compile(
+    r"\b(gast[eéó]|pagu[eé]|pag[oó]|compr[eéó]|deb[oóí]|cost[oó]|sal[ií][oó]|gasto)\b",
+    re.IGNORECASE,
+)
+_KEYWORDS_INGRESO = re.compile(
+    r"\b(gan[eéó]|cobr[eéó]|recib[ií]|ingres[eéó]|deposit[oóa]|vend[ií]|me\s+pag[ao]ron|me\s+deposit[ao]ron)\b",
+    re.IGNORECASE,
+)
+
+
+def _override_es_ingreso(texto: str, datos: dict) -> dict:
+    """Fuerza es_ingreso basado en palabras clave; el LLM solo decide si no hay señal clara."""
+    if _KEYWORDS_GASTO.search(texto):
+        datos["es_ingreso"] = False
+    elif _KEYWORDS_INGRESO.search(texto):
+        datos["es_ingreso"] = True
+    return datos
 
 class DatosExtraidos(BaseModel):
     """Esquema estricto que la IA debe respetar al responder"""
@@ -34,7 +55,7 @@ async def extraer_datos_texto_async(texto: str) -> dict:
     
     datos = resultado.model_dump()
     datos["texto_original"] = texto
-    return datos
+    return _override_es_ingreso(texto, datos)
 
 async def extraer_datos_audio_async(file_path: str) -> dict:
     """Transcribe el audio usando Whisper y luego extrae los datos."""
@@ -65,4 +86,5 @@ async def extraer_datos_imagen_async(file_path: str) -> dict:
     
     datos = resultado.model_dump()
     datos["texto_original"] = "Imagen de recibo procesada"
+    datos["es_ingreso"] = False  # un ticket/recibo es siempre un gasto
     return datos
