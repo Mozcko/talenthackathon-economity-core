@@ -29,7 +29,7 @@ MOCK_EXTRACTION_DATA = {
     "texto_original": "Pagué 150 por un café"
 }
 
-@patch("src.api.routers.upload._resolve_sub_categoria_id", return_value=3)
+@patch("src.api.routers.upload.resolve_sub_categoria_id", return_value=3)
 @patch("src.api.routers.upload.extraction_agent.extraer_datos_texto_async", new_callable=AsyncMock)
 def test_procesar_texto(mock_extraer, mock_resolve):
     mock_extraer.return_value = dict(MOCK_EXTRACTION_DATA)
@@ -43,7 +43,7 @@ def test_procesar_texto(mock_extraer, mock_resolve):
     assert data["sub_categoria_id"] == 3
     mock_extraer.assert_called_once_with("Pagué 150 por un café")
 
-@patch("src.api.routers.upload._resolve_sub_categoria_id", return_value=3)
+@patch("src.api.routers.upload.resolve_sub_categoria_id", return_value=3)
 @patch("src.api.routers.upload.extraction_agent.extraer_datos_audio_async", new_callable=AsyncMock)
 def test_procesar_audio(mock_extraer, mock_resolve):
     mock_extraer.return_value = dict(MOCK_EXTRACTION_DATA)
@@ -60,7 +60,7 @@ def test_procesar_audio(mock_extraer, mock_resolve):
     assert data["sub_categoria_id"] == 3
     mock_extraer.assert_called_once()
 
-@patch("src.api.routers.upload._resolve_sub_categoria_id", return_value=3)
+@patch("src.api.routers.upload.resolve_sub_categoria_id", return_value=3)
 @patch("src.api.routers.upload.extraction_agent.extraer_datos_imagen_async", new_callable=AsyncMock)
 def test_procesar_imagen(mock_extraer, mock_resolve):
     mock_extraer.return_value = dict(MOCK_EXTRACTION_DATA)

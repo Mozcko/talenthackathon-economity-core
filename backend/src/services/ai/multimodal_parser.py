@@ -11,9 +11,10 @@ from src.core.config import settings
 client = OpenAI(api_key=settings.openai_api_key)
 
 class TransaccionExtraida(BaseModel):
-    monto: Decimal = Field(description="El monto numérico exacto de la operación.")
+    monto: Decimal = Field(description="El monto numérico exacto de la operación, siempre positivo.")
     descripcion: str = Field(description="Una breve descripción limpia de la transacción.")
-    sub_categoria_id: int = Field(description="Clasifica el gasto. 1: Ingreso, 2: Comida, 3: Transporte, 4: Otros.")
+    es_ingreso: bool = Field(description="True solo si es un ingreso (sueldo, venta, transferencia recibida). False para cualquier gasto, pago o compra.")
+    categoria_sugerida: str = Field(description="Categoría del movimiento (ej. 'Gasolina', 'Sueldo/Nómina', 'Despensa/Super', 'Renta', 'Restaurante').")
 
 def transcribir_audio(audio_path: str) -> str:
     with open(audio_path, "rb") as audio_file:
@@ -28,8 +29,12 @@ def extraer_datos_financieros(texto: str) -> TransaccionExtraida:
     structured_llm = llm.with_structured_output(TransaccionExtraida)
     
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "Eres el cerebro de Economity. Extrae los datos financieros clave en formato estructurado."),
-        ("human", "Texto transcrito: {texto}")
+        ("system",
+         "Eres el motor de extracción de Economity. "
+         "Extrae los datos financieros del texto. "
+         "REGLA: es_ingreso=True SOLO para salarios, ventas o transferencias recibidas. "
+         "es_ingreso=False para TODO gasto, pago, compra o servicio contratado."),
+        ("human", "Texto: {texto}")
     ])
     
     chain = prompt | structured_llm
@@ -46,7 +51,7 @@ def extraer_datos_de_imagen(image_path: str) -> TransaccionExtraida:
     prompt = ChatPromptTemplate.from_messages([
         ("system", "Eres Economity. Extrae los datos financieros de la imagen proporcionada."),
         ("human", [
-            {"type": "text", "text": "Analiza este ticket y extrae el monto total y de qué trata el gasto:"},
+            {"type": "text", "text": "Este es un ticket o recibo de compra — es siempre un GASTO (es_ingreso=False). Extrae el monto total y la categoría del gasto:"},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
         ])
     ])
