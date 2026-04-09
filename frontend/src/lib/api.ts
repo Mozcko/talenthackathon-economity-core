@@ -29,14 +29,21 @@ export async function getAppContext(): Promise<AppContext> {
   if (_ctxPromise) return _ctxPromise;
 
   _ctxPromise = (async (): Promise<AppContext> => {
-    const cached = sessionStorage.getItem('economity_ctx');
-    if (cached) {
-      try { return JSON.parse(cached); } catch { /* stale cache */ }
-    }
-
     await waitForClerkReady();
     const userId = (window as any).Clerk?.user?.id as string;
     if (!userId) throw new Error('No hay sesión activa');
+
+    // Restore stable fields from cache, but always re-fetch the cuentaId
+    // to avoid serving a stale account UUID that no longer exists in the DB.
+    let cachedTenantId: string | null = null;
+    const cached = sessionStorage.getItem('economity_ctx');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as AppContext;
+        if (parsed.userId === userId) cachedTenantId = parsed.tenantId;
+        else sessionStorage.removeItem('economity_ctx');
+      } catch { sessionStorage.removeItem('economity_ctx'); }
+    }
 
     const headers = await getAuthHeaders();
 
@@ -72,7 +79,7 @@ export async function getAppContext(): Promise<AppContext> {
       cuentaId = (await cuentaRes.json()).id;
 
     } else if (userRes.ok) {
-      tenantId = (await userRes.json()).tenant_id;
+      tenantId = cachedTenantId ?? (await userRes.json()).tenant_id;
 
       const cuentasRes = await fetch(`/api/usuarios/${userId}/cuentas/`, { headers });
       if (!cuentasRes.ok) throw new Error(`Error cargando cuentas: ${cuentasRes.status}`);
