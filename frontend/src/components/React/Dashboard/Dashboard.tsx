@@ -1,128 +1,80 @@
-import { useEffect, useState } from 'react';
-import { apiFetch } from '../../../lib/api';
-
-interface MetaProxima {
-  nombre: string;
-  monto_objetivo: string;
-  progreso_actual: string;
-  fecha_limite: string | null;
-}
-
-interface DashboardData {
-  saldo_total: string;
-  flujo_caja_mensual: string;
-  score_resiliencia: number;
-  meta_proxima: MetaProxima | null;
-  mejor_oportunidad: Record<string, any> | null;
-}
-
-function Skeleton() {
-  return (
-    <div className="card-base h-full flex flex-col justify-center space-y-8 shadow-(--shadow-ambient) bg-primary-container animate-pulse">
-      <div className="flex justify-between items-center border-b border-white/10 pb-6">
-        <div className="space-y-3">
-          <div className="h-4 w-24 bg-white/10 rounded" />
-          <div className="h-10 w-48 bg-white/10 rounded" />
-        </div>
-        <div className="flex flex-col items-end space-y-3">
-          <div className="h-4 w-28 bg-white/10 rounded" />
-          <div className="h-8 w-16 bg-white/10 rounded-lg" />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-6 pt-2">
-        {[1, 2].map((i) => (
-          <div key={i} className="space-y-3">
-            <div className="h-4 w-32 bg-white/10 rounded" />
-            <div className="h-8 w-36 bg-white/10 rounded" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const DATOS_CERO: DashboardData = {
-  saldo_total: '0.00',
-  flujo_caja_mensual: '0.00',
-  score_resiliencia: 0,
-  meta_proxima: null,
-  mejor_oportunidad: null,
-};
+import { useState, useEffect, useRef } from 'react';
+import rudySad from '../../../assets/rudy_sad.png';
+import rudyAngry from '../../../assets/rudy_angry.jpeg';
+import rudyHappy from '../../../assets/rudy_happy.png';
+import DataCapture from './DataCapture';
 
 export default function Dashboard() {
-  const [datos, setDatos] = useState<DashboardData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [cargando, setCargando] = useState(true);
+  // --- Rudy Face Rotation Logic ---
+  const faces = [rudySad, rudyAngry, rudyHappy];
+  const [faceIndex, setFaceIndex] = useState(0);
 
   useEffect(() => {
-    apiFetch<DashboardData>('/dashboard/summary')
-      .then(setDatos)
-      .catch((err) => {
-        console.error('[Dashboard] Error cargando resumen:', err.message);
-        setError(err.message);
-      })
-      .finally(() => setCargando(false));
+    const interval = setInterval(() => {
+      setFaceIndex((prev) => (prev + 1) % faces.length);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
-  if (cargando) return <Skeleton />;
+  // --- Voice Detection Chunk (ported/kept) ---
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<BlobPart[]>([]);
 
-  const displayDatos = datos ?? DATOS_CERO;
+  const handleAudioClick = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
 
-  const progresoPct = displayDatos.meta_proxima
-    ? Math.min(100, (parseFloat(displayDatos.meta_proxima.progreso_actual) / parseFloat(displayDatos.meta_proxima.monto_objetivo)) * 100)
-    : 0;
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach((track) => track.stop());
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
+      } catch (err) {
+        console.error('Error al acceder al micrófono:', err);
+      }
+    }
+  };
 
   return (
-    <div className="h-full flex flex-col gap-2">
-      <div className="card-base flex-1 flex flex-col justify-center space-y-8 shadow-(--shadow-ambient) bg-primary-container">
-        {/* Top: Assets & Score */}
-        <div className="flex justify-between items-center border-b border-white/10 pb-6">
-          <div>
-            <p className="text-sm font-medium text-white/60 mb-1">Patrimonio Total</p>
-            <div className="flex items-baseline gap-2">
-              <h2 className="text-display-lg font-bold text-white">${displayDatos.saldo_total}</h2>
-              <span className="text-lg font-medium text-white/60">MXN</span>
-            </div>
+    <div className="h-full flex flex-col items-center justify-center p-6 space-y-12">
+      {/* Rudy Presentation Layer */}
+      <div className="relative flex flex-col items-center">
+        
+        {/* Speech Bubble */}
+        <div className="mb-8 relative animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="bg-surface-container-lowest p-6 rounded-3xl shadow-ambient border border-outline-variant/20 max-w-sm">
+            <p className="text-on-surface text-lg font-display font-bold leading-tight">
+              ¡Hola! Soy Rudy. <br />
+              <span className="text-secondary">¿Qué movimiento financiero registramos hoy?</span>
+            </p>
           </div>
-          <div className="text-right flex flex-col items-end">
-            <p className="text-sm font-medium text-white/60 mb-2">Score Resiliencia</p>
-            <div className="ai-chip text-lg px-4 py-2">{displayDatos.score_resiliencia}</div>
-          </div>
+          {/* Speech Bubble Tail */}
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-6 h-6 bg-surface-container-lowest rotate-45 border-b border-r border-outline-variant/20 shadow-[4px_4px_10px_rgba(0,0,0,0.02)]"></div>
         </div>
 
-        {/* Bottom: Cashflow & Next Goal */}
-        <div className="grid grid-cols-2 gap-6 pt-2">
-          <div>
-            <p className="text-sm font-medium text-white/60 mb-1">Flujo Libre Mensual</p>
-            <p className="text-3xl font-bold text-on-tertiary-fixed">${displayDatos.flujo_caja_mensual}</p>
-          </div>
-
-          <div>
-            {displayDatos.meta_proxima ? (
-              <>
-                <p className="text-sm font-medium text-white/60 mb-1">Meta Próxima</p>
-                <p className="text-base font-bold text-white truncate">{displayDatos.meta_proxima.nombre}</p>
-                <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden mt-2">
-                  <div
-                    className="bg-secondary h-full rounded-full transition-all duration-1000 ease-out"
-                    style={{ width: `${progresoPct}%` }}
-                  />
-                </div>
-                <p className="text-xs text-white/50 mt-1">{progresoPct.toFixed(0)}% completado</p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-medium text-white/60 mb-1">Meta Próxima</p>
-                <p className="text-sm text-white/40 italic">Sin metas activas</p>
-              </>
-            )}
-          </div>
+        {/* Rudy Animated Face */}
+        <div className="w-56 h-56 rounded-full overflow-hidden border-8 border-white shadow-ambient bg-surface-container-high transition-transform hover:scale-105 duration-500">
+          <img 
+            src={typeof faces[faceIndex] === 'string' ? faces[faceIndex] : (faces[faceIndex] as any).src} 
+            alt="Rudy Face" 
+            className="w-full h-full object-cover transition-opacity duration-500"
+          />
         </div>
       </div>
 
-      {error && (
-        <p className="text-xs text-red-400/70 px-1">Error al cargar datos: {error}</p>
-      )}
     </div>
   );
 }
