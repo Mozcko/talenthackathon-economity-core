@@ -1,3 +1,5 @@
+import time
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -20,13 +22,29 @@ from src.api.routers import dashboard as dashboard_routes
 from src.api.routers import gamification as gamification_routes
 from src.api.routers import upload as upload_routes
 
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Wait for DB to be ready before creating tables
+    for attempt in range(10):
+        try:
+            Base.metadata.create_all(bind=engine)
+            print("✅ Base de datos lista.")
+            break
+        except Exception as e:
+            if attempt == 9:
+                raise RuntimeError(f"No se pudo conectar a la base de datos después de 10 intentos: {e}") from e
+            print(f"⏳ Esperando DB (intento {attempt + 1}/10): {e}")
+            time.sleep(3)
+    yield
+
 
 # Inicialización de la aplicación FastAPI
 app = FastAPI(
     title=settings.app_title,
     description=settings.app_description,
-    version=settings.app_version
+    version=settings.app_version,
+    lifespan=lifespan,
 )
 
 # Inclusión de Routers
