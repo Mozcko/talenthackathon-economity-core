@@ -18,6 +18,15 @@ from src.services.ai import multimodal_parser as ai_service
 
 router = APIRouter(prefix="/transacciones", tags=["Transacciones"])
 
+
+def _get_tenant_id(db: Session, user_id: str) -> UUID:
+    """Resolve the tenant UUID for a Clerk user ID via DB lookup."""
+    from src.models.user import Usuario
+    user = db.query(Usuario).filter(Usuario.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return user.tenant_id
+
 # --- RUTAS CRUD TRADICIONALES ---
 
 @router.post("/", response_model=TransaccionResponse)
@@ -30,13 +39,11 @@ def create_transaccion(
     Registra una nueva transacción financiera (ingreso o egreso) manualmente.
     Requiere autenticación Bearer (JWT).
     """
-    # Aislamiento Zero-Trust: Forzamos el tenant_id extraído del token
-    tenant_id = token_payload.get("sub")
-    if not tenant_id:
+    # Zero-Trust: resolve tenant UUID from the authenticated user record
+    user_id = token_payload.get("sub")
+    if not user_id:
         raise HTTPException(status_code=400, detail="Token inválido: no contiene 'sub'")
-    
-    # Asignamos el ID del usuario firmado para prevenir inyección de datos cruzados
-    transaccion.tenant_id = UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id
+    transaccion.tenant_id = _get_tenant_id(db, user_id)
     
     return transaction_service.create_transaccion(db=db, transaccion=transaccion)
 
@@ -67,10 +74,11 @@ def registrar_transaccion_por_voz(
     [Zero-Friction] Recibe un audio dictado por el usuario, lo transcribe con Whisper, 
     extrae los datos estructurados con GPT-4o y registra la transacción en la base de datos.
     """
-    # 1. Aislamiento Zero-Trust
-    tenant_id = token_payload.get("sub") 
-    if not tenant_id:
-        raise HTTPException(status_code=400, detail="Token no contiene 'sub' (tenant_id)")
+    # 1. Zero-Trust: resolve tenant UUID from the authenticated user record
+    user_id = token_payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Token no contiene 'sub'")
+    tenant_uuid = _get_tenant_id(db, user_id)
 
     # 2. Guardar el archivo temporalmente en disco para que Whisper lo pueda leer
     temp_file_path = f"temp_{file.filename}"
@@ -89,18 +97,17 @@ def registrar_transaccion_por_voz(
         nueva_transaccion = TransaccionCreate(
             cuenta_id=cuenta_id,
             sub_categoria_id=datos_ia.sub_categoria_id,
-            tenant_id=UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id,
+            tenant_id=tenant_uuid,
             monto=datos_ia.monto,
             fecha_operacion=datetime.now(),
             descripcion=datos_ia.descripcion
         )
-        
+
         # 6. Persistir en la base de datos relacional
         db_res = transaction_service.create_transaccion(db=db, transaccion=nueva_transaccion)
-        
+
         # 7. Bono Extra por Zero-Friction (IA)
         from src.services import gamification as gamification_service
-        user_id = token_payload.get("sub")
         gamification_service.award_xp(
             db, 
             user_id=user_id, 
@@ -129,9 +136,10 @@ def registrar_transaccion_por_ticket(
     [Zero-Friction] Recibe la foto de un ticket, extrae los datos con GPT-4o Vision 
     y registra el gasto automáticamente.
     """
-    tenant_id = token_payload.get("sub")
-    if not tenant_id:
+    user_id = token_payload.get("sub")
+    if not user_id:
         raise HTTPException(status_code=400, detail="Token inválido")
+    tenant_uuid = _get_tenant_id(db, user_id)
 
     # Guardar imagen temporalmente
     temp_file_path = f"temp_{file.filename}"
@@ -145,18 +153,17 @@ def registrar_transaccion_por_ticket(
         nueva_transaccion = TransaccionCreate(
             cuenta_id=cuenta_id,
             sub_categoria_id=datos_ia.sub_categoria_id,
-            tenant_id=UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id,
+            tenant_id=tenant_uuid,
             monto=datos_ia.monto,
             fecha_operacion=datetime.now(),
             descripcion=datos_ia.descripcion
         )
-        
+
         # Persistir
         db_res = transaction_service.create_transaccion(db=db, transaccion=nueva_transaccion)
-        
+
         # Bono Extra Vision (IA)
         from src.services import gamification as gamification_service
-        user_id = token_payload.get("sub")
         gamification_service.award_xp(
             db, 
             user_id=user_id, 
@@ -180,8 +187,10 @@ def borrar_transaccion(
     token_payload: Dict[str, Any] = Depends(get_current_user_token)
 ):
     """Elimina una transacción en caso de error (requiere validación de dueño)."""
-    tenant_id = token_payload.get("sub")
-    tenant_uuid = UUID(tenant_id) if isinstance(tenant_id, str) and '-' in tenant_id else tenant_id
+    user_id = token_payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Token inválido")
+    tenant_uuid = _get_tenant_id(db, user_id)
     
     # Buscamos la transacción validando que pertenezca al usuario
     from src.models.transaction import Transaccion
