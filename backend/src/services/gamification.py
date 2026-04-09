@@ -23,6 +23,10 @@ def get_profile(db: Session, user_id: str) -> PerfilGamificacion:
     """Obtiene o crea el perfil de gamificación de un usuario."""
     perfil = db.query(PerfilGamificacion).filter(PerfilGamificacion.usuario_id == user_id).first()
     if not perfil:
+        # Verify the user exists to avoid FK constraint violation on insert
+        if not db.query(Usuario).filter(Usuario.id == user_id).first():
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
         perfil = PerfilGamificacion(usuario_id=user_id)
         db.add(perfil)
         db.commit()

@@ -34,14 +34,18 @@ export default function GamificationProfile() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       apiFetch<Perfil>('/gamification/profile'),
       apiFetch<Logro[]>('/gamification/achievements'),
       apiFetch<Hito>('/gamification/next-milestone'),
-    ])
-      .then(([p, a, h]) => { setPerfil(p); setLogros(a); setHito(h); })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+    ]).then(([p, a, h]) => {
+      if (p.status === 'fulfilled') setPerfil(p.value);
+      if (a.status === 'fulfilled') setLogros(a.value);
+      if (h.status === 'fulfilled') setHito(h.value);
+      if (p.status === 'rejected' && a.status === 'rejected' && h.status === 'rejected') {
+        setError(p.reason?.message ?? 'Error cargando perfil');
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -60,7 +64,17 @@ export default function GamificationProfile() {
     );
   }
 
-  if (!perfil) return null;
+  const perfilDisplay: Perfil = perfil ?? {
+    usuario_id: '',
+    total_xp: 0,
+    nivel_actual: 'bronze',
+    racha_actual: 0,
+    racha_maxima: 0,
+    fecha_ultima_actividad: null,
+    siguiente_nivel: 'silver',
+    xp_para_siguiente_nivel: 100,
+    porcentaje_progreso: 0,
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-6">
@@ -74,16 +88,16 @@ export default function GamificationProfile() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-white/60 text-sm font-medium uppercase tracking-wider">Nivel Actual</p>
-            <p className="text-4xl font-black mt-1">{perfil.nivel_actual}</p>
-            {perfil.siguiente_nivel && (
-              <p className="text-white/50 text-sm mt-1">→ {perfil.siguiente_nivel}</p>
+            <p className="text-4xl font-black mt-1">{perfilDisplay.nivel_actual}</p>
+            {perfilDisplay.siguiente_nivel && (
+              <p className="text-white/50 text-sm mt-1">→ {perfilDisplay.siguiente_nivel}</p>
             )}
           </div>
           <div className="text-right">
             <p className="text-white/60 text-sm font-medium uppercase tracking-wider">XP Total</p>
-            <p className="text-4xl font-black mt-1 text-on-tertiary-fixed">{perfil.total_xp.toLocaleString()}</p>
-            {perfil.xp_para_siguiente_nivel !== null && (
-              <p className="text-white/50 text-sm mt-1">{perfil.xp_para_siguiente_nivel} XP para subir</p>
+            <p className="text-4xl font-black mt-1 text-on-tertiary-fixed">{perfilDisplay.total_xp.toLocaleString()}</p>
+            {perfilDisplay.xp_para_siguiente_nivel !== null && (
+              <p className="text-white/50 text-sm mt-1">{perfilDisplay.xp_para_siguiente_nivel} XP para subir</p>
             )}
           </div>
         </div>
@@ -92,12 +106,12 @@ export default function GamificationProfile() {
         <div>
           <div className="flex justify-between text-xs text-white/50 mb-1">
             <span>Progreso al siguiente nivel</span>
-            <span>{perfil.porcentaje_progreso.toFixed(0)}%</span>
+            <span>{perfilDisplay.porcentaje_progreso.toFixed(0)}%</span>
           </div>
           <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden">
             <div
               className="bg-on-tertiary-fixed h-full rounded-full transition-all duration-1000"
-              style={{ width: `${perfil.porcentaje_progreso}%` }}
+              style={{ width: `${perfilDisplay.porcentaje_progreso}%` }}
             />
           </div>
         </div>
@@ -106,11 +120,11 @@ export default function GamificationProfile() {
         <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/10">
           <div>
             <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Racha Actual</p>
-            <p className="text-2xl font-bold mt-1">🔥 {perfil.racha_actual} días</p>
+            <p className="text-2xl font-bold mt-1">🔥 {perfilDisplay.racha_actual} días</p>
           </div>
           <div>
             <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Racha Máxima</p>
-            <p className="text-2xl font-bold mt-1">⚡ {perfil.racha_maxima} días</p>
+            <p className="text-2xl font-bold mt-1">⚡ {perfilDisplay.racha_maxima} días</p>
           </div>
         </div>
       </div>

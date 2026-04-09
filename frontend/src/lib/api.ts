@@ -46,8 +46,8 @@ export async function getAppContext(): Promise<AppContext> {
     let tenantId: string;
     let cuentaId: string;
 
-    if (userRes.status === 404) {
-      // New user — provision tenant → user → default account
+    if (userRes.status === 404 || userRes.status >= 500) {
+      // New user (404) or DB/schema issue (500) — attempt to provision
       const tenantRes = await fetch('/api/organizaciones/', {
         method: 'POST',
         headers: { ...headers, 'Content-Type': 'application/json' },
