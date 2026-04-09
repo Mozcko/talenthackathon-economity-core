@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from uuid import UUID
 from decimal import Decimal
-
+ 
 from src.models.user import Usuario, CuentaFinanciera
 from src.models.goal import MetaFinanciera
 from src.models.investment import InstrumentoCatalogo

@@ -12,7 +12,7 @@ class InstrumentoCatalogoResponse(BaseModel):
     score_minimo_requerido: int
     beneficio_fiscal: bool
     model_config = ConfigDict(from_attributes=True)
-
+ 
 class PortafolioInversionBase(BaseModel):
     saldo_invertido: Decimal
 

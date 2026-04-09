@@ -6,7 +6,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, ToolMessage
 from src.core.config import settings
 from src.core.database import SessionLocal
 from src.models.transaction import Transaccion, SubCategoria
-
+ 
 @tool
 def obtener_resumen_transacciones(tenant_id: str) -> str:
     """

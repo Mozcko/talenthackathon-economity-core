@@ -9,7 +9,7 @@ class UsuarioBase(BaseModel):
     perfil_riesgo: str = "Moderado"
     flujo_caja_libre_mensual: Decimal = Decimal('0.0')
     score_resiliencia: int = 0
-
+ 
 class UsuarioCreate(UsuarioBase):
     id: str # Llega desde Clerk
     tenant_id: UUID

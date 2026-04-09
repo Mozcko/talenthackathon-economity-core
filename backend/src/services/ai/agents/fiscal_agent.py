@@ -7,7 +7,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
 from src.core.config import settings
-
+ 
 def get_chroma_vectorstore():
     """
     Inicializa la conexión con el contenedor de ChromaDB usando la URL de settings.

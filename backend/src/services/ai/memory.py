@@ -7,7 +7,7 @@ def formatear_historial(historial: List[Dict[str, str]], limite: int = 4) -> str
     """
     if not historial:
         return "Sin contexto previo."
-    
+     
     texto_historial = ""
     for msg in historial[-limite:]:
         rol = msg.get("rol", "Usuario")

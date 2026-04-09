@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 Base = declarative_base()
 
 class AuditMixin:
-    """
+    """ 
     Mixin que agrega automáticamente columnas de auditoría.
     Garantiza trazabilidad en todos los registros financieros.
     """

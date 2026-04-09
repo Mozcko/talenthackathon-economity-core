@@ -10,7 +10,7 @@ class MetaFinancieraBase(BaseModel):
     monto_objetivo: Decimal
     progreso_actual: Decimal = Decimal('0.0')
     fecha_limite: Optional[datetime] = None
-
+ 
 class MetaFinancieraCreate(MetaFinancieraBase):
     usuario_id: str
     tenant_id: UUID

@@ -8,7 +8,7 @@ from src.services.ai.router import clasificar_intencion_async
 from src.services.ai.memory import formatear_historial
 
 router = APIRouter(prefix="/ws", tags=["WebSockets (Agentes IA)"])
-
+ 
 class ConnectionManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []
